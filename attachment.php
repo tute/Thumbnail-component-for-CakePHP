@@ -1,14 +1,63 @@
 <?php
 /*
-* File: /app/controllers/components/thumbnail.php
+* File: /app/controllers/components/attachment.php
 */
 
-class ThumbnailComponent extends Object
+class AttachmentComponent extends Object
 {
+	/*
+	* Uploads file
+	* Example usage:
+	* 	$this->Attachment->upload($this->data['Model']['Attachment']);
+	*
+	* Parameters:
+	*	data: the attachment data array from the form
+	*/
+	function upload($data) {
+		if (strlen($data['name']) > 4) {
+			$error = 0;
+			$tmpuploaddir   = 'attachments/tmp'; // /tmp/ folder (should delete image after upload)
+			$fileuploaddir  = 'attachments/files';
+
+			// Make sure the required directories exist, and create them if necessary
+			if (!is_dir($tmpuploaddir)) mkdir($tmpuploaddir, 0755, true);
+			if (!is_dir($fileuploaddir)) mkdir($fileuploaddir, 0755, true);
+
+			// Generate a unique name for the image
+			$filetype = split('/', $data['type']);
+			$filename = String::uuid();
+			settype($filename, 'string');
+			$filename .= '.' . $filetype[1];
+			$tmpfile   = $tmpuploaddir . "/$filename";
+			$filefile  = $fileuploaddir . "/$filename";
+
+			// Copy file in temporary directory
+			if (is_uploaded_file($data['tmp_name'])) {
+				// If it's image, get image size, make thumbnails.
+				if (($filetype == 'jpeg')  or ($filetype == 'jpg') or ($filetype == 'gif') or ($filetype == 'png')) {
+					if (!copy($data['tmp_name'], $tmpfile)) {
+						// echo 'Error Uploading File!';
+						unset($filename);
+						unlink($tmpfile);
+						exit();
+					}
+					// $this->thumbnailer($tmpfile, 573, 380, 195, 195, 'photos')
+				} else {
+					if (!copy($data['tmp_name'], $filefile)) {
+						// echo 'Error Uploading File!';
+						unset($filename);
+						exit();
+					}
+				}
+				return $filename;	// Image uploaded, return file name
+			}
+		}
+	}
+
 	/*
 	* Creates resized copies of input image
 	* Example usage:
-	* 	$this->Thumbnail->thumbnail($this->data['Model']['Thumbnail'], 573, 380, 80, 80, $folderName);
+	* 	$this->Attachment->thumbnail($this->data['Model']['Attachment'], 573, 380, 80, 80, $folderName);
 	*
 	* Parameters:
 	*	data: the image data array from the form
@@ -19,14 +68,14 @@ class ThumbnailComponent extends Object
 	function thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName) {
 		if (strlen($data['name']) > 4) {
 			$error = 0;
-			$tempuploaddir  = 'img/temp'; // /temp/ folder (should delete image after upload)
-			$homeuploaddir  = 'img/'.$folderName.'/home';
-			$biguploaddir   = 'img/'.$folderName.'/big';
-			$smalluploaddir = 'img/'.$folderName.'/small';
+			$tmpuploaddir   = 'attachments/tmp'; // /tmp/ folder (should delete image after upload)
+			$fileuploaddir  = 'attachments/'.$folderName.'/files';
+			$biguploaddir   = 'attachments/'.$folderName.'/big';
+			$smalluploaddir = 'attachments/'.$folderName.'/small';
 
 			// Make sure the required directories exist, and create them if necessary
-			if (!is_dir($tempuploaddir)) mkdir($tempuploaddir, 0755, true);
-			if (!is_dir($homeuploaddir)) mkdir($homeuploaddir, 0755, true);
+			if (!is_dir($tmpuploaddir))  mkdir($tmpuploaddir, 0755, true);
+			if (!is_dir($fileuploaddir)) mkdir($fileuploaddir, 0755, true);
 			if (!is_dir($biguploaddir))  mkdir($biguploaddir, 0755, true);
 			if (!is_dir($smalluploaddir)) mkdir($smalluploaddir, 0755, true);
 
@@ -41,40 +90,35 @@ class ThumbnailComponent extends Object
 			}
 
 			// Generate a unique name for the image
-			$id_unic = $uuid = String::uuid();
-			$filename = $id_unic;
+			$filename = String::uuid();
 
 			settype($filename, 'string');
 			$filename .= '.';
 			$filename .= $filetype;
-			$tempfile  = $tempuploaddir . "/$filename";
-			$homefile  = $homeuploaddir . "/$filename";
+			$tmpfile   = $tmpuploaddir . "/$filename";
+			$filefile  = $fileuploaddir . "/$filename";
 			$resizedfile = $biguploaddir . "/$filename";
 			$croppedfile = $smalluploaddir . "/$filename";
 
 			if (is_uploaded_file($data['tmp_name'])) {
 				// Copy the image into the temporary directory
-				if (!copy($data['tmp_name'], $tempfile)) {
+				if (!copy($data['tmp_name'], $tmpfile)) {
 					// echo 'Error Uploading File!';
 					unset($filename);
-					unlink($tempfile);
+					unlink($tmpfile);
 					exit();
 				} else {
 					/*
-					 *	Generate home page version (center cropped)
-					 */
-					$this->resizeImage('resizeCrop', $tempuploaddir, $filename, $homeuploaddir, $filename, 886, 473, 85);
-					/*
 					 *	Generate the big version of the image with max of $imgscale in either directions
 					 */
-					$this->resizeImage('resize', $tempuploaddir, $filename, $biguploaddir, $filename, $maxw, $maxh, 85);
+					$this->resizeImage('resize', $tmpuploaddir, $filename, $biguploaddir, $filename, $maxw, $maxh, 85);
 					/*
 					 *	Generate the small thumbnail version of the image with scale of $thumbscalew and $thumbscaleh
 					 */
-					$this->resizeImage('resize', $tempuploaddir, $filename, $smalluploaddir, $filename, $thumbscalew, $thumbscaleh, 75);
+					$this->resizeImage('resize', $tmpuploaddir, $filename, $smalluploaddir, $filename, $thumbscalew, $thumbscaleh, 75);
 
 					// Delete temporary image
-					unlink($tempfile);
+					unlink($tmpfile);
 				}
 			}
 
@@ -87,27 +131,20 @@ class ThumbnailComponent extends Object
 	/*
 	* Deletes the image and its associated thumbnail
 	* Example usage:
-	*	this->Thumbnail->delete_image('1210632285.jpg', $folderName);
+	*	this->Attachment->delete_image('1210632285.jpg', $folderName);
 	*
 	* Parameters:
 	*	filename: The file name of the image
 	*	folderName: the name of the parent folder of the images.
 	*/
 	function delete_image($filename,$folderName) {
-		if(is_file('img/'.$folderName.'/home/'.$filename))
-			unlink('img/'.$folderName.'/home/'.$filename);
-		if(is_file('img/'.$folderName.'/big/'.$filename))
-			unlink('img/'.$folderName.'/big/'.$filename);
-		if(is_file('img/'.$folderName.'/small/'.$filename))
-			unlink('img/'.$folderName.'/small/'.$filename);
+		if(is_file('attachments/'.$folderName.'/files/'.$filename))
+			unlink('attachments/'.$folderName.'/files/'.$filename);
+		if(is_file('attachments/'.$folderName.'/big/'.$filename))
+			unlink('attachments/'.$folderName.'/big/'.$filename);
+		if(is_file('attachments/'.$folderName.'/small/'.$filename))
+			unlink('attachments/'.$folderName.'/small/'.$filename);
 	}
-
-	function get_file_extension($str) {
-		$i = strrpos($str, '.');
-		if (!$i) return '';
-		$l = strlen($str) - $i;
-		return substr($str, $i+1, $l);
-    }
 
 	/*
 	* Creates resized image copy
@@ -128,7 +165,7 @@ class ThumbnailComponent extends Object
 		list($oldWidth, $oldHeight, $type) = getimagesize($srcimg);
 		$ext = $this->image_type_to_extension($type);
 
-		//check to make sure that the file is writeable, if so, create destination image (temp image)
+		// If file is writeable, create destination (tmp) image
 		if (is_writeable($dstfolder)) {
 			$dstimg = $dstfolder.DS.$dstname;
 		} else {
@@ -140,7 +177,7 @@ class ThumbnailComponent extends Object
 
 		// Check if something is requested, otherwise do not resize
 		if ($newWidth or $newHeight) {
-			/* If temp file exists, delete it */
+			/* If tmp file exists, delete it */
 			if(file_exists($dstimg)) {
 				unlink($dstimg);
 			} else {

@@ -1,6 +1,5 @@
-*Thumbnail component for CakePHP* creates big, small and "homepage" copies
-of an image, and stores them in folders
-	@/app/webroot/img/$folderName/{big|small|home}@
+*Attachment component for CakePHP* handles file uploads to the file system. It
+has thumbnailing capabilities if it's an image file.
 
 I've started it from the public copy at
 "@http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/@":http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/
@@ -9,17 +8,21 @@ to have a standard way of uploading files to CakePHP projects.
 
 h2. Usage
 
-# Copy @thumbnail.php@ to @/app/controllers/components/@
-# Add component to your controller: @var $components = array('Thumbnail');@
+# Copy @attachment.php@ to @/app/controllers/components/@
+# Add component to your controller: @var $components = array('Attachment');@
 # In your controller action:
-	@$img_path = $this->Thumbnail->thumbnail($this->data['Model']['Thumbnail'], 573, 380, 80, 80, $folderName);@
+	@$img_path = $this->Attachment->upload($this->data['Model']['Attachment']);@
 # In your upload form:
-## @echo $form->create('Model',array('type' => 'file'));@
-## @echo $form->file('Thumbnail');@
-# In your view (@$data['Model']['image_path']@ is the stored file name):
-	@<?= $html->image($folderName.'/big/'.$data['Model']['image_path']); ?>@
+## @echo $form->create('Model', array('type' => 'file'));@
+## @echo $form->file('Attachment');@
+# In your view, if it's an image (@$data['Model']['image_path']@):
+	@<?= $html->image('/attachments/$folderName/big/'.$data['Model']['image_path']); ?>@
 
 h2. Parameters:
+
+h3. upload($data)
+
+* @data@: file data array from the form
 
 h3. thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName)
 
@@ -35,4 +38,4 @@ h3. delete_image($filename, $folderName)
 
 h2. To do list
 
- * Upload any type of file; resize only if it's image type.
+ * Upload to file-system or to database.
