@@ -25,9 +25,10 @@ class AttachmentComponent extends Object
 
 			// Generate a unique name for the image
 			$filetype = split('/', $data['type']);
+			$filetype = $filetype[1];
 			$filename = String::uuid();
 			settype($filename, 'string');
-			$filename .= '.' . $filetype[1];
+			$filename .= '.' . $filetype;
 			$tmpfile   = $tmpuploaddir . "/$filename";
 			$filefile  = $fileuploaddir . "/$filename";
 
@@ -41,7 +42,7 @@ class AttachmentComponent extends Object
 						unlink($tmpfile);
 						exit();
 					}
-					// $this->thumbnailer($tmpfile, 573, 380, 195, 195, 'photos')
+					$this->thumbnail($tmpfile, 573, 380, 195, 195, 'photos');
 				} else {
 					if (!copy($data['tmp_name'], $filefile)) {
 						// echo 'Error Uploading File!';
@@ -60,71 +61,39 @@ class AttachmentComponent extends Object
 	* 	$this->Attachment->thumbnail($this->data['Model']['Attachment'], 573, 380, 80, 80, $folderName);
 	*
 	* Parameters:
-	*	data: the image data array from the form
+	*	tmpfile: tmp image file name
 	*	maxw/maxh: maximum width/height for resizing thumbnails
 	*	thumbscaleh: maximum height that you want your thumbnail to be resized to
 	*	folderName: the name of the parent folder of the images
 	*/
-	function thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName) {
-		if (strlen($data['name']) > 4) {
-			$error = 0;
-			$tmpuploaddir   = 'attachments/tmp'; // /tmp/ folder (should delete image after upload)
-			$fileuploaddir  = 'attachments/'.$folderName.'/files';
-			$biguploaddir   = 'attachments/'.$folderName.'/big';
-			$smalluploaddir = 'attachments/'.$folderName.'/small';
+	function thumbnail($tmpfile, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName) {
+		$biguploaddir   = 'attachments/'.$folderName.'/big';
+		$smalluploaddir = 'attachments/'.$folderName.'/small';
 
-			// Make sure the required directories exist, and create them if necessary
-			if (!is_dir($tmpuploaddir))  mkdir($tmpuploaddir, 0755, true);
-			if (!is_dir($fileuploaddir)) mkdir($fileuploaddir, 0755, true);
-			if (!is_dir($biguploaddir))  mkdir($biguploaddir, 0755, true);
-			if (!is_dir($smalluploaddir)) mkdir($smalluploaddir, 0755, true);
+		// Make sure the required directories exist, and create them if necessary
+		if (!is_dir($biguploaddir))  mkdir($biguploaddir, 0755, true);
+		if (!is_dir($smalluploaddir)) mkdir($smalluploaddir, 0755, true);
 
-			$filetype = $this->get_file_extension($data['name']);
-			$filetype = strtolower($filetype);
+		$file_name = split('/', $tmpfile);
+		$file_name = $file_name[2];
 
-			// Verify file extension. Get image size.
-			if (($filetype != 'jpeg')  && ($filetype != 'jpg') && ($filetype != 'gif') && ($filetype != 'png')) {
-				return;
-			} else {
-				$imgsize = GetImageSize($data['tmp_name']);
-			}
+		$resizedfile = $biguploaddir . "/$file_name";
+		$croppedfile = $smalluploaddir . "/$file_name";
 
-			// Generate a unique name for the image
-			$filename = String::uuid();
+		$imgsize = GetImageSize($tmpfile);
+		/*
+		 *	Generate the big version of the image with max of $imgscale in either directions
+		 */
+		$this->resizeImage('resize', $tmpfile, $biguploaddir, $file_name, $maxw, $maxh, 85);
+		/*
+		 *	Generate the small thumbnail version of the image with scale of $thumbscalew and $thumbscaleh
+		 */
+		$this->resizeImage('resize', $tmpfile, $smalluploaddir, $file_name, $thumbscalew, $thumbscaleh, 75);
 
-			settype($filename, 'string');
-			$filename .= '.';
-			$filename .= $filetype;
-			$tmpfile   = $tmpuploaddir . "/$filename";
-			$filefile  = $fileuploaddir . "/$filename";
-			$resizedfile = $biguploaddir . "/$filename";
-			$croppedfile = $smalluploaddir . "/$filename";
+		// Delete temporary image
+		unlink($tmpfile);
 
-			if (is_uploaded_file($data['tmp_name'])) {
-				// Copy the image into the temporary directory
-				if (!copy($data['tmp_name'], $tmpfile)) {
-					// echo 'Error Uploading File!';
-					unset($filename);
-					unlink($tmpfile);
-					exit();
-				} else {
-					/*
-					 *	Generate the big version of the image with max of $imgscale in either directions
-					 */
-					$this->resizeImage('resize', $tmpuploaddir, $filename, $biguploaddir, $filename, $maxw, $maxh, 85);
-					/*
-					 *	Generate the small thumbnail version of the image with scale of $thumbscalew and $thumbscaleh
-					 */
-					$this->resizeImage('resize', $tmpuploaddir, $filename, $smalluploaddir, $filename, $thumbscalew, $thumbscaleh, 75);
-
-					// Delete temporary image
-					unlink($tmpfile);
-				}
-			}
-
-			// Image uploaded, return the file name
-			return $filename;
-		}
+		// Image thumbnailed
 	}
 
 
@@ -151,17 +120,16 @@ class AttachmentComponent extends Object
 	*
 	* Parameters:
 	*	cType: Conversion type {resize (default) | resizeCrop (square) | crop (from center)}
-	*	id: image filename
-	*	imgFolder: the folder where image is
+	*	tmpfile: original (tmp) file name
 	*	newName: include extension (if desired)
 	*	newWidth: the max width or crop width
 	*	newHeight: the max height or crop height
 	*	quality: the quality of the image
 	*	bgcolor: required for backward compatibility (?)
 	*/
-	function resizeImage($cType = 'resize', $srcfolder, $srcname, $dstfolder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75)
+	function resizeImage($cType = 'resize', $tmpfile, $dstfolder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75)
 	{
-		$srcimg = $srcfolder.DS.$srcname;
+		$srcimg = $tmpfile;
 		list($oldWidth, $oldHeight, $type) = getimagesize($srcimg);
 		$ext = $this->image_type_to_extension($type);
 

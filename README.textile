@@ -1,5 +1,7 @@
-*Attachment component for CakePHP* handles file uploads to the file system. It
-has thumbnailing capabilities if it's an image file.
+*Attachment component for CakePHP* handles file uploads to the file system. If
+it's an image file, it creates big and small thumbnails in
+@/app/webroot/attachments/photos/{big|small}@ folders; other files are stored
+in @/app/webroot/attachments/files@.
 
 I've started it from the public copy at
 "@http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/@":http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/
@@ -15,14 +17,14 @@ h2. Usage
 # In your upload form:
 ## @echo $form->create('Model', array('type' => 'file'));@
 ## @echo $form->file('Attachment');@
-# In your view, if it's an image (@$data['Model']['image_path']@):
-	@<?= $html->image('/attachments/$folderName/big/'.$data['Model']['image_path']); ?>@
+# In your view, if it's an image (@$data['Model']['img_path']@):
+	@<?= $html->image('/attachments/$folderName/big/'.$data['Model']['img_path']); ?>@
 
-h2. Parameters:
+h2. Usage:
 
 h3. upload($data)
 
-* @data@: file data array from the form
+* @data@: file data array from the form. If it's an image, it calls:
 
 h3. thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName)
 
