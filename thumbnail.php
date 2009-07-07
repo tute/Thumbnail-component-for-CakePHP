@@ -34,82 +34,72 @@
 class ThumbnailComponent extends Object
 {
 	function thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName) {
-		if (strlen($data['name'])>4){ 
-					$error = 0;
-					$tempuploaddir = "img/temp"; // the /temp/ directory, should delete the image after we upload
-					$homeuploaddir = "img/".$folderName."/home"; // the /home/ directory
-					$biguploaddir = "img/".$folderName."/big"; // the /big/ directory
-					$smalluploaddir = "img/".$folderName."/small"; // the /small/ directory for thumbnails
-					
-					// Make sure the required directories exist, and create them if necessary
-					if(!is_dir($tempuploaddir)) mkdir($tempuploaddir,0755,true);
-					if(!is_dir($homeuploaddir)) mkdir($homeuploaddir,0755,true);
-					if(!is_dir($biguploaddir)) mkdir($biguploaddir,0755,true);
-					if(!is_dir($smalluploaddir)) mkdir($smalluploaddir,0755,true);
-					
-					$filetype = $this->getFileExtension($data['name']);
-					$filetype = strtolower($filetype);
- 
-					if (($filetype != "jpeg")  && ($filetype != "jpg") && ($filetype != "gif") && ($filetype != "png"))
-					{
-						// verify the extension
-						return;
-					}
-					else
-					{
-						// Get the image size
-						$imgsize = GetImageSize($data['tmp_name']);
-					}
+		if (strlen($data['name']) > 4) {
+			$error = 0;
+			$tempuploaddir  = 'img/temp'; // /temp/ folder (should delete image after upload)
+			$homeuploaddir  = 'img/'.$folderName.'/home';
+			$biguploaddir   = 'img/'.$folderName.'/big';
+			$smalluploaddir = 'img/'.$folderName.'/small';
 
-					// Generate a unique name for the image (from the timestamp)
-					//$id_unic = str_replace(".", "", strtotime ("now"));
-					$id_unic = $uuid = String::uuid();
-					$filename = $id_unic;
-					  
-					settype($filename,"string");
-					$filename.= ".";
-					$filename.=$filetype;
-					$tempfile = $tempuploaddir . "/$filename";
-					$homefile = $homeuploaddir . "/$filename";
-					$resizedfile = $biguploaddir . "/$filename";
-					$croppedfile = $smalluploaddir . "/$filename";
-					
-					
-					if (is_uploaded_file($data['tmp_name']))
-                    {                    
-						// Copy the image into the temporary directory
-                        if (!copy($data['tmp_name'],"$tempfile"))
-                        {
-                            //print "Error Uploading File!.";
-							unset($filename);
-							unlink($tempfile);
-                            exit(); 
-                        }
-						else {				
-							/*
-							 *	Generate the home page version of the image center cropped
-							 */
-							$this->resizeImage('resizeCrop', $tempuploaddir, $filename, $homeuploaddir, $filename, 886, 473, 85);
-							/*
-							 *	Generate the big version of the image with max of $imgscale in either directions
-							 */
-							$this->resizeImage('resize', $tempuploaddir, $filename, $biguploaddir, $filename, $maxw, $maxh, 85);							
+			// Make sure the required directories exist, and create them if necessary
+			if (!is_dir($tempuploaddir)) mkdir($tempuploaddir, 0755, true);
+			if (!is_dir($homeuploaddir)) mkdir($homeuploaddir, 0755, true);
+			if (!is_dir($biguploaddir))  mkdir($biguploaddir, 0755, true);
+			if (!is_dir($smalluploaddir)) mkdir($smalluploaddir, 0755, true);
 
-							/*
-							 *	Generate the small thumbnail version of the image with scale of $thumbscalew and $thumbscaleh
-							 */
-							$this->resizeImage('resizeCrop', $tempuploaddir, $filename, $smalluploaddir, $filename, $thumbscalew, $thumbscaleh, 75);
-													
-							// Delete the temporary image
-							unlink($tempfile);
-						}
-                    }
- 
-                     // Image uploaded, return the file name
-					 return $filename;   
+			$filetype = $this->getFileExtension($data['name']);
+			$filetype = strtolower($filetype);
+
+			// Verify file extension. Get image size.
+			if (($filetype != 'jpeg')  && ($filetype != 'jpg') && ($filetype != 'gif') && ($filetype != 'png')) {
+				return;
+			} else {
+				$imgsize = GetImageSize($data['tmp_name']);
+			}
+
+			// Generate a unique name for the image
+			$id_unic = $uuid = String::uuid();
+			$filename = $id_unic;
+
+			settype($filename, 'string');
+			$filename .= '.';
+			$filename .= $filetype;
+			$tempfile  = $tempuploaddir . "/$filename";
+			$homefile  = $homeuploaddir . "/$filename";
+			$resizedfile = $biguploaddir . "/$filename";
+			$croppedfile = $smalluploaddir . "/$filename";
+
+			if (is_uploaded_file($data['tmp_name'])) {
+				// Copy the image into the temporary directory
+				if (!copy($data['tmp_name'], '$tempfile')) {
+					// echo 'Error Uploading File!';
+					unset($filename);
+					unlink($tempfile);
+					exit();
+				} else {
+					/*
+					 *	Generate home page version (center cropped)
+					 */
+					$this->resizeImage('resizeCrop', $tempuploaddir, $filename, $homeuploaddir, $filename, 886, 473, 85);
+					/*
+					 *	Generate the big version of the image with max of $imgscale in either directions
+					 */
+					$this->resizeImage('resize', $tempuploaddir, $filename, $biguploaddir, $filename, $maxw, $maxh, 85);
+					/*
+					 *	Generate the small thumbnail version of the image with scale of $thumbscalew and $thumbscaleh
+					 */
+					$this->resizeImage('resizeCrop', $tempuploaddir, $filename, $smalluploaddir, $filename, $thumbscalew, $thumbscaleh, 75);
+
+					// Delete temporary image
+					unlink($tempfile);
+				}
+			}
+
+			// Image uploaded, return the file name
+			return $filename;   
 		}
 	}
-	
+
 	/*
 	*	Deletes the image and its associated thumbnail
 	*	Example in controller action:	$this->Image->delete_image("1210632285.jpg","sets");
@@ -126,9 +116,9 @@ class ThumbnailComponent extends Object
 		if(is_file("img/".$folderName."/small/".$filename))
 			unlink("img/".$folderName."/small/".$filename);
 	}
- 
+
     function getFileExtension($str) {
- 
+
         $i = strrpos($str,".");
         if (!$i) { return ""; }
         $l = strlen($str) - $i;
@@ -151,7 +141,7 @@ class ThumbnailComponent extends Object
 		$srcimg = $srcfolder.DS.$srcname;
 		list($oldWidth, $oldHeight, $type) = getimagesize($srcimg); 
 		$ext = $this->image_type_to_extension($type);
-		
+
 		//check to make sure that the file is writeable, if so, create destination image (temp image)
 		if (is_writeable($dstfolder))
 		{
@@ -164,7 +154,7 @@ class ThumbnailComponent extends Object
 			debug("Run \"chmod 777 on '$dstfolder' folder\"");
 			exit();
 		}
-		
+
 		//check to make sure that something is requested, otherwise there is nothing to resize.
 		//although, could create option for quality only
 		if ($newWidth OR $newHeight)
@@ -186,7 +176,7 @@ class ThumbnailComponent extends Object
 						# within the maxW(newWidth) and maxH(newHeight) (thus some side will be smaller)
 						$widthScale = 2;
 						$heightScale = 2;
-						
+
 						// Check to see that we are not over resizing, otherwise, set the new scale
 						if($newWidth) {
 							if($newWidth > $oldWidth) $newWidth = $oldWidth;
@@ -207,7 +197,7 @@ class ThumbnailComponent extends Object
 							$maxHeight = $newHeight;
 							$maxWidth = $newWidth;
 						}
-						
+
 						if($maxWidth > $maxHeight){
 							$applyWidth = $maxWidth;
 							$applyHeight = ($oldHeight*$applyWidth)/$oldWidth;
@@ -222,15 +212,15 @@ class ThumbnailComponent extends Object
 						$startY = 0;
 						break;
 					case 'resizeCrop':
-					
+
 						// Check to see that we are not over resizing, otherwise, set the new scale						
 						// -- resize to max, then crop to center
 						if($newWidth > $oldWidth) $newWidth = $oldWidth;	
 							$ratioX = $newWidth / $oldWidth;
-						
+
 						if($newHeight > $oldHeight) $newHeight = $oldHeight;
 							$ratioY = $newHeight / $oldHeight;									
-	
+
 						if ($ratioX < $ratioY) { 
 							$startX = round(($oldWidth - ($newWidth / $ratioY))/2);
 							$startY = 0;
@@ -255,7 +245,7 @@ class ThumbnailComponent extends Object
 						$applyWidth = $newWidth;
 						break;
 				}
-				
+
 				switch($ext)
 				{
 					case 'gif' :
@@ -273,13 +263,13 @@ class ThumbnailComponent extends Object
 						return false;
 						break;
 				}
-				
+
 				//create new image
 				$newImage = imagecreatetruecolor($applyWidth, $applyHeight);
-								
+
 				//put old image on top of new image
 				imagecopyresampled($newImage, $oldImage, 0,0 , $startX, $startY, $applyWidth, $applyHeight, $oldWidth, $oldHeight);
-				
+
 					switch($ext)
 					{
 						case 'gif' :
@@ -296,17 +286,16 @@ class ThumbnailComponent extends Object
 							return false;
 							break;
 					}
-				
+
 				imagedestroy($newImage);
 				imagedestroy($oldImage);
-								
+
 				return true;
 			}
 
 		} else {
 			return false;
 		}
-		
 
 	}
 
