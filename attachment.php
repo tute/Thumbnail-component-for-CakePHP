@@ -6,7 +6,7 @@
 class AttachmentComponent extends Object
 {
 	/* Configuration options */
-	public $config = array(
+	var $config = array(
 		'photos_dir' => 'photos',
 		'allow_non_image_files' => true,
 	);
@@ -68,7 +68,7 @@ class AttachmentComponent extends Object
 	/*
 	* Creates resized copies of input image
 	* Example usage:
-	* 	$this->Attachment->thumbnail($this->data['Model']['Attachment'], 573, 380, 80, 80, $folderName);
+	*	$this->Attachment->thumbnail($this->data['Model']['Attachment'], 573, 380, 80, 80, $folderName);
 	*
 	* Parameters:
 	*	tmpfile: tmp image file name
@@ -108,21 +108,20 @@ class AttachmentComponent extends Object
 
 
 	/*
-	* Deletes the image and its associated thumbnail
+	* Deletes file, or image and associated thumbnail
 	* Example usage:
-	*	this->Attachment->delete_image('1210632285.jpg', $folderName);
+	*	this->Attachment->delete_files('1210632285.jpg');
 	*
 	* Parameters:
 	*	filename: The file name of the image
-	*	folderName: the name of the parent folder of the images.
 	*/
-	function delete_image($filename,$folderName) {
-		if(is_file('attachments/'.$folderName.'/files/'.$filename))
-			unlink('attachments/'.$folderName.'/files/'.$filename);
-		if(is_file('attachments/'.$folderName.'/big/'.$filename))
-			unlink('attachments/'.$folderName.'/big/'.$filename);
-		if(is_file('attachments/'.$folderName.'/small/'.$filename))
-			unlink('attachments/'.$folderName.'/small/'.$filename);
+	function delete_files($filename) {
+		if(is_file('attachments/files/'.$filename))
+			unlink('attachments/files/'.$filename);
+		if(is_file('attachments/'.$this->config['photos_dir'].'/big/'.$filename))
+			unlink('attachments/'.$this->config['photos_dir'].'/big/'.$filename);
+		if(is_file('attachments/'.$this->config['photos_dir'].'/small/'.$filename))
+			unlink('attachments/'.$this->config['photos_dir'].'/small/'.$filename);
 	}
 
 	/*

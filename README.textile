@@ -33,10 +33,9 @@ h3. thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName)
 * @thumbscalew/thumbscaleh@: maximum width/height scale for resizing images
 * @folderName@: the name of the parent folder of the images
 
-h3. delete_image($filename, $folderName)
+h3. delete_files($filename)
 
-* @filename@: file name of the image
-* @folderName@: name of the parent folder of the images
+* @filename@: file to delete name
 
 h2. Requirements
 
@@ -47,5 +46,4 @@ h2. Requirements
 h2. To do list
 
 * Separate methods (FS/DB)
-* delete_files_FS($filename)
 * Upload to file-system or to database
