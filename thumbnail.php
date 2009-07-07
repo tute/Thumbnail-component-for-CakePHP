@@ -5,6 +5,17 @@
 
 class ThumbnailComponent extends Object
 {
+	/*
+	* Deletes the image and its associated thumbnail
+	* Example in controller action:
+	* 	$this->Thumbnail->thumbnail($this->data, 'name1', 573, 380, 80, 80, $folderName);
+	*
+	* Parameters:
+	*	data: the image data array from the form
+	*	maxw/maxh: maximum width/height for resizing thumbnails
+	*	thumbscaleh: maximum height that you want your thumbnail to be resized to
+	*	folderName: the name of the parent folder of the images
+	*/
 	function thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName) {
 		if (strlen($data['name']) > 4) {
 			$error = 0;
@@ -19,7 +30,7 @@ class ThumbnailComponent extends Object
 			if (!is_dir($biguploaddir))  mkdir($biguploaddir, 0755, true);
 			if (!is_dir($smalluploaddir)) mkdir($smalluploaddir, 0755, true);
 
-			$filetype = $this->getFileExtension($data['name']);
+			$filetype = $this->get_file_extension($data['name']);
 			$filetype = strtolower($filetype);
 
 			// Verify file extension. Get image size.
@@ -72,42 +83,43 @@ class ThumbnailComponent extends Object
 		}
 	}
 
+
 	/*
-	*	Deletes the image and its associated thumbnail
-	*	Example in controller action:	$this->Image->delete_image("1210632285.jpg","sets");
+	* Deletes the image and its associated thumbnail
+	* Example in controller action:
+	*	this->Thumbnail->delete_image('1210632285.jpg', $folderName);
 	*
-	*	Parameters:
-	*	$filename: The file name of the image
-	*	$folderName: the name of the parent folder of the images. The images will be stored to /webroot/img/$folderName/big/ and  /webroot/img/$folderName/small/
+	* Parameters:
+	*	filename: The file name of the image
+	*	folderName: the name of the parent folder of the images.
 	*/
 	function delete_image($filename,$folderName) {
-		if(is_file("img/".$folderName."/home/".$filename))
-			unlink("img/".$folderName."/home/".$filename);
-		if(is_file("img/".$folderName."/big/".$filename))
-			unlink("img/".$folderName."/big/".$filename);
-		if(is_file("img/".$folderName."/small/".$filename))
-			unlink("img/".$folderName."/small/".$filename);
+		if(is_file('img/'.$folderName.'/home/'.$filename))
+			unlink('img/'.$folderName.'/home/'.$filename);
+		if(is_file('img/'.$folderName.'/big/'.$filename))
+			unlink('img/'.$folderName.'/big/'.$filename);
+		if(is_file('img/'.$folderName.'/small/'.$filename))
+			unlink('img/'.$folderName.'/small/'.$filename);
 	}
 
-    function getFileExtension($str) {
-
-        $i = strrpos($str,".");
-        if (!$i) { return ""; }
-        $l = strlen($str) - $i;
-        $ext = substr($str,$i+1,$l);
-        return $ext;
+	function get_file_extension($str) {
+		$i = strrpos($str, '.');
+		if (!$i) return '';
+		$l = strlen($str) - $i;
+		return substr($str, $i+1, $l);
     }
 
 	/*
-	 * @param $cType - the conversion type: resize (default), resizeCrop (square), crop (from center) 
-	 * @param $id - image filename
-	 * @param $imgFolder  - the folder where the image is
-	 * @param $newName - include extension (if desired)
-	 * @param $newWidth - the  max width or crop width
-	 * @param $newHeight - the max height or crop height
-	 * @param $quality - the quality of the image
-	 * @param $bgcolor - this was from a previous option that was removed, but required for backward compatibility
-	 */
+	* Parameters:
+	*	cType: Conversion type {resize (default) | resizeCrop (square) | crop (from center)}
+	*	id: image filename
+	*	imgFolder: the folder where image is
+	*	newName: include extension (if desired)
+	*	newWidth: the max width or crop width
+	*	newHeight: the max height or crop height
+	*	quality: the quality of the image
+	*	bgcolor: required for backward compatibility (?)
+	*/
 	function resizeImage($cType = 'resize', $srcfolder, $srcname, $dstfolder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75)
 	{
 		$srcimg = $srcfolder.DS.$srcname;

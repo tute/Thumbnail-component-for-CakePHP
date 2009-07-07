@@ -13,7 +13,7 @@ Add the component to your controller:
 	@var $components = array('Thumbnail');@
 
 In your controller action:
-	@$image_path = $this->Thumbnail->thumbnail($this->data, 'name1', 573, 380, 80, 80, 'sets');@
+	@$image_path = $this->Thumbnail->thumbnail($this->data, 'name1', 573, 380, 80, 80, $folderName);@
 
 In your view (where @$entries['Entry']['image_path']@ is the stored file name):
 	@<?= $html->image($folderName.'/big/'.$entries['Entry']['image_path']); ?>@
