@@ -6,9 +6,9 @@
 class ThumbnailComponent extends Object
 {
 	/*
-	* Deletes the image and its associated thumbnail
-	* Example in controller action:
-	* 	$this->Thumbnail->thumbnail($this->data, 'name1', 573, 380, 80, 80, $folderName);
+	* Creates resized copies of input image
+	* Example usage:
+	* 	$this->Thumbnail->thumbnail($this->data['Model']['Thumbnail'], 573, 380, 80, 80, $folderName);
 	*
 	* Parameters:
 	*	data: the image data array from the form
@@ -54,7 +54,7 @@ class ThumbnailComponent extends Object
 
 			if (is_uploaded_file($data['tmp_name'])) {
 				// Copy the image into the temporary directory
-				if (!copy($data['tmp_name'], '$tempfile')) {
+				if (!copy($data['tmp_name'], $tempfile)) {
 					// echo 'Error Uploading File!';
 					unset($filename);
 					unlink($tempfile);
@@ -71,7 +71,7 @@ class ThumbnailComponent extends Object
 					/*
 					 *	Generate the small thumbnail version of the image with scale of $thumbscalew and $thumbscaleh
 					 */
-					$this->resizeImage('resizeCrop', $tempuploaddir, $filename, $smalluploaddir, $filename, $thumbscalew, $thumbscaleh, 75);
+					$this->resizeImage('resize', $tempuploaddir, $filename, $smalluploaddir, $filename, $thumbscalew, $thumbscaleh, 75);
 
 					// Delete temporary image
 					unlink($tempfile);
@@ -86,7 +86,7 @@ class ThumbnailComponent extends Object
 
 	/*
 	* Deletes the image and its associated thumbnail
-	* Example in controller action:
+	* Example usage:
 	*	this->Thumbnail->delete_image('1210632285.jpg', $folderName);
 	*
 	* Parameters:
@@ -110,6 +110,8 @@ class ThumbnailComponent extends Object
     }
 
 	/*
+	* Creates resized image copy
+	*
 	* Parameters:
 	*	cType: Conversion type {resize (default) | resizeCrop (square) | crop (from center)}
 	*	id: image filename
@@ -145,12 +147,12 @@ class ThumbnailComponent extends Object
 				switch ($cType) {
 				default:
 				case 'resize':
-					// Maintains the aspect ratio of the image and makes sure that it fits
-					// within the maxW(newWidth) and maxH(newHeight) (thus some side will be smaller)
+					// Maintains the aspect ratio of the image and makes sure
+					// that it fits within the maxW and maxH
 					$widthScale = 2;
 					$heightScale = 2;
 
-					// Check to see that we are not over resizing, otherwise, set the new scale
+					// Check to see over-resizing, or set new scale
 					if($newWidth) {
 						if($newWidth > $oldWidth) $newWidth = $oldWidth;
 						$widthScale = 	$newWidth / $oldWidth;
@@ -209,7 +211,7 @@ class ThumbnailComponent extends Object
 					break;
 
 				case 'crop':
-					// -- a straight centered crop
+					// straight centered crop
 					$startY = ($oldHeight - $newHeight)/2;
 					$startX = ($oldWidth - $newWidth)/2;
 					$oldHeight = $newHeight;
@@ -236,11 +238,10 @@ class ThumbnailComponent extends Object
 					break;
 				}
 
-				//create new image
+				// Create new image
 				$newImage = imagecreatetruecolor($applyWidth, $applyHeight);
-
-				//put old image on top of new image
-				imagecopyresampled($newImage, $oldImage, 0,0 , $startX, $startY, $applyWidth, $applyHeight, $oldWidth, $oldHeight);
+				// Put old image on top of new image
+				imagecopyresampled($newImage, $oldImage, 0, 0, $startX, $startY, $applyWidth, $applyHeight, $oldWidth, $oldHeight);
 
 				switch($ext) {
 				case 'gif' :
@@ -268,6 +269,7 @@ class ThumbnailComponent extends Object
 			return false;
 		}
 	}
+
 
 	function image_type_to_extension($imagetype) {
 		if(empty($imagetype)) return false;

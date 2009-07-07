@@ -12,10 +12,10 @@ h2. Usage
 # Copy @thumbnail.php@ to @/app/controllers/components/@
 # Add component to your controller: @var $components = array('Thumbnail');@
 # In your controller action:
-	@$img_path = $this->Thumbnail->thumbnail($this->data, 'name', 573, 380, 80, 80, $folderName);@
+	@$img_path = $this->Thumbnail->thumbnail($this->data['Model']['Thumbnail'], 573, 380, 80, 80, $folderName);@
 # In your upload form:
 ## @echo $form->create('Model',array('type' => 'file'));@
-## @echo $form->file('Thumbnail/name');@
+## @echo $form->file('Thumbnail');@
 # In your view (@$data['Model']['image_path']@ is the stored file name):
 	@<?= $html->image($folderName.'/big/'.$data['Model']['image_path']); ?>@
 
@@ -32,3 +32,7 @@ h3. delete_image($filename, $folderName)
 
 * @filename@: file name of the image
 * @folderName@: name of the parent folder of the images
+
+h2. To do list
+
+ * Upload any type of file; resize only if it's image type.
