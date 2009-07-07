@@ -5,6 +5,12 @@
 
 class AttachmentComponent extends Object
 {
+	/* Configuration options */
+	public $config = array(
+		'photos_dir' => 'photos',
+		'allow_non_image_files' => true,
+	);
+
 	/*
 	* Uploads file
 	* Example usage:
@@ -35,22 +41,26 @@ class AttachmentComponent extends Object
 			// Copy file in temporary directory
 			if (is_uploaded_file($data['tmp_name'])) {
 				// If it's image, get image size, make thumbnails.
-				if (($filetype == 'jpeg')  or ($filetype == 'jpg') or ($filetype == 'gif') or ($filetype == 'png')) {
+				if ($this->is_image($filetype)) {
 					if (!copy($data['tmp_name'], $tmpfile)) {
-						// echo 'Error Uploading File!';
+						// Error uploading file
 						unset($filename);
 						unlink($tmpfile);
 						exit();
 					}
-					$this->thumbnail($tmpfile, 573, 380, 195, 195, 'photos');
+					$this->thumbnail($tmpfile, 573, 380, 195, 195, $this->config['photos_dir']);
 				} else {
+					if ($this->config['allow_non_image_files'] != true) {
+						echo 'File type not permitted.';
+						exit();
+					}
 					if (!copy($data['tmp_name'], $filefile)) {
-						// echo 'Error Uploading File!';
+						// Error uploading file
 						unset($filename);
 						exit();
 					}
 				}
-				return $filename;	// Image uploaded, return file name
+				return $filename;  // Image uploaded; return file name
 			}
 		}
 	}
@@ -88,7 +98,7 @@ class AttachmentComponent extends Object
 		/*
 		 *	Generate the small thumbnail version of the image with scale of $thumbscalew and $thumbscaleh
 		 */
-		$this->resizeImage('resize', $tmpfile, $smalluploaddir, $file_name, $thumbscalew, $thumbscaleh, 75);
+		$this->resizeImage('resizeCrop', $tmpfile, $smalluploaddir, $file_name, $thumbscalew, $thumbscaleh, 75);
 
 		// Delete temporary image
 		unlink($tmpfile);
@@ -125,7 +135,6 @@ class AttachmentComponent extends Object
 	*	newWidth: the max width or crop width
 	*	newHeight: the max height or crop height
 	*	quality: the quality of the image
-	*	bgcolor: required for backward compatibility (?)
 	*/
 	function resizeImage($cType = 'resize', $tmpfile, $dstfolder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75)
 	{
@@ -273,6 +282,11 @@ class AttachmentComponent extends Object
 		} else {
 			return false;
 		}
+	}
+
+
+	function is_image($filetype) {
+		return (($filetype == 'jpeg')  or ($filetype == 'jpg') or ($filetype == 'gif') or ($filetype == 'png'));
 	}
 
 

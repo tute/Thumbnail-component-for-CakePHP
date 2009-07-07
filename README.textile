@@ -20,7 +20,7 @@ h2. Usage
 # In your view, if it's an image:
   @<?= $html->image('/attachments/$folderName/big/'.$data['Model']['file_path']); ?>@
 
-h2. Usage:
+h2. Methods
 
 h3. upload($data)
 
@@ -46,4 +46,6 @@ h2. Requirements
 
 h2. To do list
 
- * Upload to file-system or to database.
+* Separate methods (FS/DB)
+* delete_files_FS($filename)
+* Upload to file-system or to database
