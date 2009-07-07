@@ -1,52 +1,39 @@
 <?php
 /*
- File: /app/controllers/components/image.php
+* File: /app/controllers/components/thumbnail.php
+*
+* Uploads an image, its thumbnail and a zoom cropped image to
+* $folderName/big, $folderName/small and $folderName/home respectively.
+*
+*
+* USAGE (CONTROLLER):
+*
+* Add the component to your components array:
+*	var $components = array('Thumbnail');
+*
+* In your controller action (returns the file name of the result image):
+*	$image_path = $this->Thumbnail->thumbnail($this->data,'name1', 573,380,80,80, 'sets');
+*
+*
+* USAGE (VIEW):
+*
+*	<?= $html->image($folderName.'/big/'.$entries['Entry']['image_path']);
+* where $entries['Entry']['image_path'] is the stored file name
+*
+*
+* PARAMETERS:
+*	$data: the image data array from the form
+*	$maxw: the maximum width that you want your picture to be resized to
+*	$maxh: the maximum width that you want your picture to be resized to
+*	$thumbscalew: the maximum width hat you want your thumbnail to be resized to
+*	$thumbscaleh: the maximum height that you want your thumbnail to be resized to
+*	$folderName: the name of the parent folder of the images. The images will be stored to /webroot/img/$folderName/big/ and  /webroot/img/$folderName/small/
+*
 */
-class ImageComponent extends Object
+
+class ThumbnailComponent extends Object
 {
-	/*
-	*	Uploads an image and its thumbnail into $folderName/big and $folderName/small respectivley.
-	* 	Also uploads a zoom cropped image into $folderName/home. You could easily modify it to suit your needs!
-	
-	* 	Directions:
-	*	In view where you upload the image, make sure your form creation is similar to the following
-	*	<?= $form->create('ControllerName',array('type' => 'file')); ?>
-	
-
-	*	In view where you upload the image, make sure that you have a file input similar to the following
-	*	<?= $form->file('Image/image1'); ?>
-	
-	
-	*	In the controller, add the component to your components array
-	*	var $components = array("Image");
-	
-
-	*	In your controller action (the parameters are expained below)
-	*	$image_path = $this->Image->upload_image_and_thumbnail($this->data,"name1", 573,380,80,80, "sets");
-	*	this returns the file name of the result image.  You can  store this file name in the database
-	*
-	*	Note that your image will be stored in 3 locations:
-	*	Image: /webroot/img/$folderName/big/$image_path 
-	*	Thumbnail:  /webroot/img/$folderName/small/$image_path 
-	*	Homepage:  /webroot/img/$folderName/home/$image_path  
-	*
-	*	You could easily add more locations or remove locations you don't need
-
-
-	*	Finally in the view where you want to see the images
-	*	<?= $html->image('sets/big/'.$furnitureSet['FurnitureSet']['image_path']);
-	* 	where "sets" is the folder name we saved our pictures in, and $furnitureSet['FurnitureSet']['image_path'] is the file name we stored in the database
-	
-
-	*	Parameters:
-	*	$data: the image data array from the form
-	*	$maxw: the maximum width that you want your picture to be resized to
-	*	$maxh: the maximum width that you want your picture to be resized to
-	*	$thumbscalew: the maximum width hat you want your thumbnail to be resized to
-	*	$thumbscaleh: the maximum height that you want your thumbnail to be resized to
-	*	$folderName: the name of the parent folder of the images. The images will be stored to /webroot/img/$folderName/big/ and  /webroot/img/$folderName/small/
-	*/	
-	function upload_image_and_thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName) {
+	function thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName) {
 		if (strlen($data['name'])>4){ 
 					$error = 0;
 					$tempuploaddir = "img/temp"; // the /temp/ directory, should delete the image after we upload
