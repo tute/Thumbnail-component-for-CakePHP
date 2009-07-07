@@ -1,34 +1,6 @@
 <?php
 /*
 * File: /app/controllers/components/thumbnail.php
-*
-* Uploads an image, its thumbnail and a zoom cropped image to
-* $folderName/big, $folderName/small and $folderName/home respectively.
-*
-*
-* USAGE (CONTROLLER):
-*
-* Add the component to your components array:
-*	var $components = array('Thumbnail');
-*
-* In your controller action (returns the file name of the result image):
-*	$image_path = $this->Thumbnail->thumbnail($this->data,'name1', 573,380,80,80, 'sets');
-*
-*
-* USAGE (VIEW):
-*
-*	<?= $html->image($folderName.'/big/'.$entries['Entry']['image_path']);
-* where $entries['Entry']['image_path'] is the stored file name
-*
-*
-* PARAMETERS:
-*	$data: the image data array from the form
-*	$maxw: the maximum width that you want your picture to be resized to
-*	$maxh: the maximum width that you want your picture to be resized to
-*	$thumbscalew: the maximum width hat you want your thumbnail to be resized to
-*	$thumbscaleh: the maximum height that you want your thumbnail to be resized to
-*	$folderName: the name of the parent folder of the images. The images will be stored to /webroot/img/$folderName/big/ and  /webroot/img/$folderName/small/
-*
 */
 
 class ThumbnailComponent extends Object
