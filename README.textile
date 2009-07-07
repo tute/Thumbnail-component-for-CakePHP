@@ -13,12 +13,12 @@ h2. Usage
 # Copy @attachment.php@ to @/app/controllers/components/@
 # Add component to your controller: @var $components = array('Attachment');@
 # In your controller action:
-	@$img_path = $this->Attachment->upload($this->data['Model']['Attachment']);@
+  @$file_path = $this->Attachment->upload($this->data['Model']['Attachment']);@
 # In your upload form:
 ## @echo $form->create('Model', array('type' => 'file'));@
 ## @echo $form->file('Attachment');@
-# In your view, if it's an image (@$data['Model']['img_path']@):
-	@<?= $html->image('/attachments/$folderName/big/'.$data['Model']['img_path']); ?>@
+# In your view, if it's an image:
+  @<?= $html->image('/attachments/$folderName/big/'.$data['Model']['file_path']); ?>@
 
 h2. Usage:
 
@@ -37,6 +37,12 @@ h3. delete_image($filename, $folderName)
 
 * @filename@: file name of the image
 * @folderName@: name of the parent folder of the images
+
+h2. Requirements
+
+* PHP GD library installed and enabled
+* You must store in database @$file_path@ returned by
+  @$this->Attachment->upload@ in order to reference the file.
 
 h2. To do list
 
