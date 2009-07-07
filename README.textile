@@ -1,5 +1,5 @@
 *Thumbnail component for CakePHP* creates big, small and "homepage" copies
-of an image, and stores them in the folder
+of an image, and stores them in folders
 	@/app/webroot/img/$folderName/{big|small|home}@
 
 I've started it from the public copy at
@@ -7,20 +7,28 @@ I've started it from the public copy at
 to have a standard way of uploading files to CakePHP projects.
 
 
-h2. Installation and usage
+h2. Usage
 
-Add the component to your controller:
-	@var $components = array('Thumbnail');@
-
-In your controller action:
-	@$image_path = $this->Thumbnail->thumbnail($this->data, 'name1', 573, 380, 80, 80, $folderName);@
-
-In your view (where @$entries['Entry']['image_path']@ is the stored file name):
-	@<?= $html->image($folderName.'/big/'.$entries['Entry']['image_path']); ?>@
+# Copy @thumbnail.php@ to @/app/controllers/components/@
+# Add component to your controller: @var $components = array('Thumbnail');@
+# In your controller action:
+	@$img_path = $this->Thumbnail->thumbnail($this->data, 'name', 573, 380, 80, 80, $folderName);@
+# In your upload form:
+## @echo $form->create('Model',array('type' => 'file'));@
+## @echo $form->file('Thumbnail/name');@
+# In your view (@$data['Model']['image_path']@ is the stored file name):
+	@<?= $html->image($folderName.'/big/'.$data['Model']['image_path']); ?>@
 
 h2. Parameters:
 
-* @$data@: the image data array from the form
-* @$maxw/$maxh@: maximum width/height for resizing thumbnails
-* @$thumbscaleh@: maximum height that you want your thumbnail to be resized to
-* @$folderName@: the name of the parent folder of the images
+h3. thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName)
+
+* @data@: the image data array from the form
+* @maxw/maxh@: maximum width/height for resizing images
+* @thumbscalew/thumbscaleh@: maximum width/height scale for resizing images
+* @folderName@: the name of the parent folder of the images
+
+h3. delete_image($filename, $folderName)
+
+* @filename@: file name of the image
+* @folderName@: name of the parent folder of the images
