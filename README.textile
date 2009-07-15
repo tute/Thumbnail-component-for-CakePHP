@@ -16,17 +16,16 @@ h2. Usage
 ## @echo $form->create('Model', array('type' => 'file'));@
 ## @echo $form->file('Attachment');@
 
-h3. Filesystem (default)
+h3. Filesystem storage (default)
 
 # In your controller action (save @file_path@):
   @$file_path = $this->Attachment->upload($this->data['Model']['Attachment']);@
 # In your view, if it's an image:
   @<?= $html->image('/attachments/$folderName/big/'.$data['Model']['file_path']); ?>@
 
-h2. Database
+h3. Database storage
 
-# Change @$config['database'] = true@ in attachment.php to turn on database
-  file handling.
+# Change @$config['database'] = true@ in attachment.php.
 # In your controller action:
   @$binary_data = $this->Attachment->upload($this->data['Model']['Attachment']);@
 # Save @$binary_data@ to database binary column:
@@ -59,5 +58,5 @@ h2. Requirements
 
 h2. To do list
 
-* Resize in upload_DB
+* Image resize in upload_DB.
 * Handle mapping file array <-> object in component.
