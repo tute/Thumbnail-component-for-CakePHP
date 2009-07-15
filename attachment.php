@@ -8,18 +8,34 @@ class AttachmentComponent extends Object
 	/* Configuration options */
 	var $config = array(
 		'photos_dir' => 'photos',
+		'database' => false,
 		'allow_non_image_files' => true,
 	);
 
 	/*
-	* Uploads file
+	* Uploads file to either database or file system, according to $config.
 	* Example usage:
 	* 	$this->Attachment->upload($this->data['Model']['Attachment']);
 	*
 	* Parameters:
-	*	data: the attachment data array from the form
+	*	data: the file input array
 	*/
 	function upload($data) {
+		if ($this->config['database'] == false) {
+			return $this->upload_FS($data);
+		} else {
+			return $this->upload_DB($data);
+		}
+	}
+
+	function upload_DB($data) {
+		$fp = fopen($data['tmp_name'], 'r');
+		$content = fread($fp, filesize($data['tmp_name']));
+		fclose($fp);
+		return addslashes($content);
+	}
+
+	function upload_FS($data) {
 		if (strlen($data['name']) > 4) {
 			$error = 0;
 			$tmpuploaddir   = 'attachments/tmp'; // /tmp/ folder (should delete image after upload)

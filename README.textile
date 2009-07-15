@@ -12,13 +12,27 @@ h2. Usage
 
 # Copy @attachment.php@ to @/app/controllers/components/@
 # Add component to your controller: @var $components = array('Attachment');@
-# In your controller action:
-  @$file_path = $this->Attachment->upload($this->data['Model']['Attachment']);@
 # In your upload form:
 ## @echo $form->create('Model', array('type' => 'file'));@
 ## @echo $form->file('Attachment');@
+
+h3. Filesystem (default)
+
+# In your controller action (save @file_path@):
+  @$file_path = $this->Attachment->upload($this->data['Model']['Attachment']);@
 # In your view, if it's an image:
   @<?= $html->image('/attachments/$folderName/big/'.$data['Model']['file_path']); ?>@
+
+h2. Database
+
+# Change @$config['database'] = true@ in attachment.php to turn on database
+  file handling.
+# In your controller action:
+  @$binary_data = $this->Attachment->upload($this->data['Model']['Attachment']);@
+# Save @$binary_data@ to database binary column:
+  @$this->data['Model']['file_contents'] = $binary_data@
+
+(No image processing yet, to-do!)
 
 h2. Methods
 
@@ -45,5 +59,5 @@ h2. Requirements
 
 h2. To do list
 
-* Separate methods (FS/DB)
-* Upload to file-system or to database
+* Resize in upload_DB
+* Handle mapping file array <-> object in component.
