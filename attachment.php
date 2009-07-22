@@ -21,6 +21,9 @@ class AttachmentComponent extends Object
 	*	data: the file input array
 	*/
 	function upload($data) {
+		if ($data['size'] == 0) {
+			return false;
+		}
 		if ($this->config['database'] == false) {
 			return $this->upload_FS($data);
 		} else {
@@ -36,48 +39,46 @@ class AttachmentComponent extends Object
 	}
 
 	function upload_FS($data) {
-		if (strlen($data['name']) > 4) {
-			$error = 0;
-			$tmpuploaddir   = 'attachments/tmp'; // /tmp/ folder (should delete image after upload)
-			$fileuploaddir  = 'attachments/files';
+		$error = 0;
+		$tmpuploaddir   = 'attachments/tmp'; // /tmp/ folder (should delete image after upload)
+		$fileuploaddir  = 'attachments/files';
 
-			// Make sure the required directories exist, and create them if necessary
-			if (!is_dir($tmpuploaddir)) mkdir($tmpuploaddir, 0755, true);
-			if (!is_dir($fileuploaddir)) mkdir($fileuploaddir, 0755, true);
+		// Make sure the required directories exist, and create them if necessary
+		if (!is_dir($tmpuploaddir)) mkdir($tmpuploaddir, 0755, true);
+		if (!is_dir($fileuploaddir)) mkdir($fileuploaddir, 0755, true);
 
-			// Generate a unique name for the image
-			$filetype = split('/', $data['type']);
-			$filetype = $filetype[1];
-			$filename = String::uuid();
-			settype($filename, 'string');
-			$filename .= '.' . $filetype;
-			$tmpfile   = $tmpuploaddir . "/$filename";
-			$filefile  = $fileuploaddir . "/$filename";
+		// Generate a unique name for the image
+		$filetype = split('/', $data['type']);
+		$filetype = $filetype[1];
+		$filename = String::uuid();
+		settype($filename, 'string');
+		$filename .= '.' . $filetype;
+		$tmpfile   = $tmpuploaddir . "/$filename";
+		$filefile  = $fileuploaddir . "/$filename";
 
-			// Copy file in temporary directory
-			if (is_uploaded_file($data['tmp_name'])) {
-				// If it's image, get image size, make thumbnails.
-				if ($this->is_image($filetype)) {
-					if (!copy($data['tmp_name'], $tmpfile)) {
-						// Error uploading file
-						unset($filename);
-						unlink($tmpfile);
-						exit();
-					}
-					$this->thumbnail($tmpfile, 573, 380, 195, 195, $this->config['photos_dir']);
-				} else {
-					if ($this->config['allow_non_image_files'] != true) {
-						echo 'File type not permitted.';
-						exit();
-					}
-					if (!copy($data['tmp_name'], $filefile)) {
-						// Error uploading file
-						unset($filename);
-						exit();
-					}
+		// Copy file in temporary directory
+		if (is_uploaded_file($data['tmp_name'])) {
+			// If it's image, get image size, make thumbnails.
+			if ($this->is_image($filetype)) {
+				if (!copy($data['tmp_name'], $tmpfile)) {
+					// Error uploading file
+					unset($filename);
+					unlink($tmpfile);
+					exit();
 				}
-				return $filename;  // Image uploaded; return file name
+				$this->thumbnail($tmpfile, 573, 380, 195, 195, $this->config['photos_dir']);
+			} else {
+				if ($this->config['allow_non_image_files'] != true) {
+					echo 'File type not permitted.';
+					exit();
+				}
+				if (!copy($data['tmp_name'], $filefile)) {
+					// Error uploading file
+					unset($filename);
+					exit();
+				}
 			}
+			return $filename;  // Image uploaded; return file name
 		}
 	}
 
