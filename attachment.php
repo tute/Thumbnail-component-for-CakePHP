@@ -278,7 +278,7 @@ class AttachmentComponent extends Object
 					imagegif($newImage, $dstimg, $quality);
 					break;
 				case 'png' :
-					imagepng($newImage, $dstimg, $quality);
+					imagepng($newImage, $dstimg, round($quality/10));
 					break;
 				case 'jpg' :
 				case 'jpeg' :
