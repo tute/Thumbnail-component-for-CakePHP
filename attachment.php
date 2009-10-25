@@ -48,8 +48,7 @@ class AttachmentComponent extends Object
 		if (!is_dir($fileuploaddir)) mkdir($fileuploaddir, 0755, true);
 
 		// Generate a unique name for the image
-		$filetype = split('/', $data['type']);
-		$filetype = $filetype[1];
+		$filetype = end(split('\.', $data['name']));
 		$filename = String::uuid();
 		settype($filename, 'string');
 		$filename .= '.' . $filetype;

@@ -59,4 +59,4 @@ h2. Requirements
 h2. To do list
 
 * Image resize in upload_DB.
-* Handle mapping file array <-> object in component.
+
