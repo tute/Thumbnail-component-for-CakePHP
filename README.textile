@@ -53,6 +53,8 @@ h3. delete_files($filename)
 h2. Requirements
 
 * PHP GD library installed and enabled
+* @/app/webroot/@ must be writable by the web server (or you can create
+  @/app/webroot/attachments/@ and make writable that folder).
 * You must store in database @$file_path@ returned by
   @$this->Attachment->upload@ in order to reference the file.
 
