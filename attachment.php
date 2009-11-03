@@ -8,8 +8,13 @@ class AttachmentComponent extends Object
 	/* Configuration options */
 	var $config = array(
 		'photos_dir' => 'photos',
-		'database' => false,
+		'database'   => false,
 		'allow_non_image_files' => true,
+		'images_size' => array(
+			'big'    => array(640, 480, false),
+			'med'    => array(263, 263, true),
+			'small'  => array( 90,  90, true)
+		)
 	);
 
 	/*
@@ -65,7 +70,13 @@ class AttachmentComponent extends Object
 					unlink($tmpfile);
 					exit();
 				}
-				$this->thumbnail($tmpfile, 573, 380, 195, 195, $this->config['photos_dir']);
+
+				/* Create new image for each thumbnail_size */
+				foreach ($this->config['images_size'] as $folder_size => $opts) {
+					$this->thumbnail($tmpfile, $folder_size, $opts[0], $opts[1], $opts[2]);
+				}
+				/* Delete temporary image */
+				unlink($tmpfile);
 			} else {
 				if ($this->config['allow_non_image_files'] != true) {
 					echo 'File type not permitted.';
@@ -77,49 +88,37 @@ class AttachmentComponent extends Object
 					exit();
 				}
 			}
-			return $filename;  // Image uploaded; return file name
+			/* File uploaded; return file name */
+			return $filename;
 		}
 	}
 
 	/*
-	* Creates resized copies of input image
-	* Example usage:
-	*	$this->Attachment->thumbnail($this->data['Model']['Attachment'], 573, 380, 80, 80, $folderName);
-	*
-	* Parameters:
-	*	tmpfile: tmp image file name
-	*	maxw/maxh: maximum width/height for resizing thumbnails
-	*	thumbscaleh: maximum height that you want your thumbnail to be resized to
-	*	folderName: the name of the parent folder of the images
-	*/
-	function thumbnail($tmpfile, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName) {
-		$biguploaddir   = 'attachments/'.$folderName.'/big';
-		$smalluploaddir = 'attachments/'.$folderName.'/small';
-
-		// Make sure the required directories exist, and create them if necessary
-		if (!is_dir($biguploaddir))  mkdir($biguploaddir, 0755, true);
-		if (!is_dir($smalluploaddir)) mkdir($smalluploaddir, 0755, true);
+	 * Creates resized copies of input image
+	 * Example usage:
+	 *	$this->Attachment->thumbnail($this->data['Model']['Attachment'], $upload_dir, 640, 480, false);
+	 *
+	 * Parameters:
+	 *	tmpfile: the image data array from the form
+	 *	upload_dir: the name of the parent folder of the images
+	 *	maxw/maxh: maximum width/height for resizing thumbnails
+	 *	crop: indicates if image must be cropped or not
+	 */
+	function thumbnail($tmpfile, $upload_dir, $maxw, $maxh, $crop = false) {
+		// Make sure the required directory exist; create it if necessary
+		$upload_dir = 'attachments/' . $this->config['photos_dir'] . '/' . $upload_dir;
+		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
 		$file_name = split('/', $tmpfile);
 		$file_name = $file_name[2];
+		$resizedfile = $upload_dir . '/' . $file_name[2];
 
-		$resizedfile = $biguploaddir . "/$file_name";
-		$croppedfile = $smalluploaddir . "/$file_name";
-
-		$imgsize = GetImageSize($tmpfile);
-		/*
-		 *	Generate the big version of the image with max of $imgscale in either directions
-		 */
-		$this->resizeImage('resize', $tmpfile, $biguploaddir, $file_name, $maxw, $maxh, 85);
-		/*
-		 *	Generate the small thumbnail version of the image with scale of $thumbscalew and $thumbscaleh
-		 */
-		$this->resizeImage('resizeCrop', $tmpfile, $smalluploaddir, $file_name, $thumbscalew, $thumbscaleh, 75);
-
-		// Delete temporary image
-		unlink($tmpfile);
-
-		// Image thumbnailed
+		if (!$crop)
+			/* Only resize */
+			$this->resizeImage('resize', $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 85);
+		else
+			/* Resize and crop */
+			$this->resizeImage('resizeCrop', $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 75);
 	}
 
 
@@ -134,10 +133,11 @@ class AttachmentComponent extends Object
 	function delete_files($filename) {
 		if(is_file('attachments/files/'.$filename))
 			unlink('attachments/files/'.$filename);
-		if(is_file('attachments/'.$this->config['photos_dir'].'/big/'.$filename))
-			unlink('attachments/'.$this->config['photos_dir'].'/big/'.$filename);
-		if(is_file('attachments/'.$this->config['photos_dir'].'/small/'.$filename))
-			unlink('attachments/'.$this->config['photos_dir'].'/small/'.$filename);
+
+		foreach ($this->config['images_size'] as $size => $opts) {
+			$photo = 'attachments/' . $this->config['photos_dir'] . "/$size/$filename";
+			if (is_file($photo)) unlink($photo);
+		}
 	}
 
 	/*
@@ -151,8 +151,7 @@ class AttachmentComponent extends Object
 	*	newHeight: the max height or crop height
 	*	quality: the quality of the image
 	*/
-	function resizeImage($cType = 'resize', $tmpfile, $dstfolder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75)
-	{
+	function resizeImage($cType = 'resize', $tmpfile, $dstfolder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75) {
 		$srcimg = $tmpfile;
 		list($oldWidth, $oldHeight, $type) = getimagesize($srcimg);
 		$ext = $this->image_type_to_extension($type);
@@ -163,7 +162,7 @@ class AttachmentComponent extends Object
 		} else {
 			// if dirFolder not writeable, let developer know
 			debug("You must allow proper permissions for image processing. And the folder has to be writable.");
-			debug("Run \"chmod 777 on '$dstfolder' folder\"");
+			debug("Run 'chmod 755 $dstfolder', and make sure the web server is it's owner.");
 			exit();
 		}
 
@@ -301,6 +300,7 @@ class AttachmentComponent extends Object
 
 
 	function is_image($filetype) {
+		$filetype = strtolower($filetype);
 		return (($filetype == 'jpeg')  or ($filetype == 'jpg') or ($filetype == 'gif') or ($filetype == 'png'));
 	}
 

@@ -1,7 +1,7 @@
 *Attachment component for CakePHP* handles file uploads to the file system. If
-it's an image file, it creates big and small thumbnails in
-@/app/webroot/attachments/photos/{big|small}@ folders; other files are stored
-in @/app/webroot/attachments/files@.
+it's an image file, it creates thumbnail copies in
+@/app/webroot/attachments/photos/{required_sizes}@ folder; while other files
+are stored in @/app/webroot/attachments/files@.
 
 I've started it from the public copy at
 "@http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/@":http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/
@@ -16,12 +16,14 @@ h2. Usage
 ## @echo $form->create('Model', array('type' => 'file'));@
 ## @echo $form->file('Attachment');@
 
+
 h3. Filesystem storage (default)
 
 # In your controller action (save @file_path@):
   @$file_path = $this->Attachment->upload($this->data['Model']['Attachment']);@
 # In your view, if it's an image:
-  @<?= $html->image('/attachments/$folderName/big/'.$data['Model']['file_path']); ?>@
+  @<?= $html->image('/attachments/$folderName/{size}/'.$data['Model']['file_path']); ?>@
+
 
 h3. Database storage
 
@@ -33,18 +35,35 @@ h3. Database storage
 
 (No image processing yet, to-do!)
 
+
+h2. Configuration options
+
+The first lines of the component defines many configuration options:
+* @photos_dir@: The folder which will hold the files, inside @/app/webroot/attachments/@.
+* @database@: Whether to save the images in the database or the filesystem.
+* @allow_non_image_files@, self descriptive ;-) .
+* @images_size@: Array of different file sizes required by your app. Each
+  element is itself an array like like the following one:
+    @'folder_name' => array($width, $height, $crop)@.
+  Default options are:
+    @'big'    => array(640, 480, false),@
+    @'med'    => array(263, 263, true),@
+    @'small'  => array( 90,  90, true)@
+  You can define as many options as you like.
+
+
 h2. Methods
 
 h3. upload($data)
 
 * @data@: file data array from the form. If it's an image, it calls:
 
-h3. thumbnail($data, $maxw, $maxh, $thumbscalew, $thumbscaleh, $folderName)
+h3. thumbnail($data, $upload_dir, $maxw, $maxh, $crop = false)
 
 * @data@: the image data array from the form
+* @upload_dir@: the name of the parent folder of the images
 * @maxw/maxh@: maximum width/height for resizing images
-* @thumbscalew/thumbscaleh@: maximum width/height scale for resizing images
-* @folderName@: the name of the parent folder of the images
+* @crop@: indicates if image must be cropped or not (defaults to @false@)
 
 h3. delete_files($filename)
 
@@ -61,4 +80,5 @@ h2. Requirements
 h2. To do list
 
 * Image resize in upload_DB.
-
+* Make it work in Windows (DS instead of / as directory separator)
+  ("Issue 3":http://github.com/tute/Thumbnail-component-for-CakePHP/issues#issue/3).
