@@ -80,5 +80,4 @@ h2. Requirements
 h2. To do list
 
 * Image resize in upload_DB.
-* Make it work in Windows (DS instead of / as directory separator)
-  ("Issue 3":http://github.com/tute/Thumbnail-component-for-CakePHP/issues#issue/3).
+

@@ -45,8 +45,8 @@ class AttachmentComponent extends Object
 
 	function upload_FS($data) {
 		$error = 0;
-		$tmpuploaddir   = 'attachments/tmp'; // /tmp/ folder (should delete image after upload)
-		$fileuploaddir  = 'attachments/files';
+		$tmpuploaddir   = WWW_ROOT.'attachments'.DS.'tmp'; // /tmp/ folder (should delete image after upload)
+		$fileuploaddir  = WWW_ROOT.'attachments'.DS.'files';
 
 		// Make sure the required directories exist, and create them if necessary
 		if (!is_dir($tmpuploaddir)) mkdir($tmpuploaddir, 0755, true);
@@ -57,8 +57,8 @@ class AttachmentComponent extends Object
 		$filename = String::uuid();
 		settype($filename, 'string');
 		$filename .= '.' . $filetype;
-		$tmpfile   = $tmpuploaddir . "/$filename";
-		$filefile  = $fileuploaddir . "/$filename";
+		$tmpfile   = $tmpuploaddir.DS.$filename;
+		$filefile  = $fileuploaddir.DS.$filename;
 
 		// Copy file in temporary directory
 		if (is_uploaded_file($data['tmp_name'])) {
@@ -106,12 +106,12 @@ class AttachmentComponent extends Object
 	 */
 	function thumbnail($tmpfile, $upload_dir, $maxw, $maxh, $crop = false) {
 		// Make sure the required directory exist; create it if necessary
-		$upload_dir = 'attachments/' . $this->config['photos_dir'] . '/' . $upload_dir;
+		$upload_dir = WWW_ROOT.'attachments'.DS.$this->config['photos_dir'].DS.$upload_dir;
 		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
-		$file_name = split('/', $tmpfile);
+		$file_name = split(DS, $tmpfile);
 		$file_name = $file_name[2];
-		$resizedfile = $upload_dir . '/' . $file_name[2];
+		$resizedfile = $upload_dir.DS.$file_name[2];
 
 		if (!$crop)
 			/* Only resize */
@@ -131,11 +131,11 @@ class AttachmentComponent extends Object
 	*	filename: The file name of the image
 	*/
 	function delete_files($filename) {
-		if(is_file('attachments/files/'.$filename))
-			unlink('attachments/files/'.$filename);
+		if(is_file(WWW_ROOT.'attachments'.DS.'files'.DS.$filename))
+			unlink(WWW_ROOT.'attachments'.DS.'files'.DS.$filename);
 
 		foreach ($this->config['images_size'] as $size => $opts) {
-			$photo = 'attachments/' . $this->config['photos_dir'] . "/$size/$filename";
+			$photo = WWW_ROOT.'attachments'.DS.$this->config['photos_dir'].DS.$size.DS.$filename;
 			if (is_file($photo)) unlink($photo);
 		}
 	}
