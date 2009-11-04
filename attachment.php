@@ -109,8 +109,7 @@ class AttachmentComponent extends Object
 		$upload_dir = WWW_ROOT.'attachments'.DS.$this->config['photos_dir'].DS.$upload_dir;
 		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
-		$file_name = split(DS, $tmpfile);
-		$file_name = $file_name[2];
+		$file_name = end(split(DS, $tmpfile));
 		$resizedfile = $upload_dir.DS.$file_name[2];
 
 		if (!$crop)
