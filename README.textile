@@ -38,18 +38,19 @@ h3. Database storage
 
 h2. Configuration options
 
-The first lines of the component defines many configuration options:
 * @photos_dir@: The folder which will hold the files, inside @/app/webroot/attachments/@.
 * @database@: Whether to save the images in the database or the filesystem.
 * @allow_non_image_files@, self descriptive ;-) .
 * @images_size@: Array of different file sizes required by your app. Each
   element is itself an array like like the following one:
-    @'folder_name' => array($width, $height, $crop)@.
-  Default options are:
-    @'big'    => array(640, 480, false),@
-    @'med'    => array(263, 263, true),@
-    @'small'  => array( 90,  90, true)@
-  You can define as many options as you like.
+    @'folder_name' => array($width, $height, $do_crop)@.
+
+Yo may override the default configuration by passing an array of options
+while including the component:
+@var $components = array('Attachment' => array(/* options */));@
+
+(You may check the @$config@ array defined at the first lines of the
+component, to see default values and the syntax for overriding them.)
 
 
 h2. Methods

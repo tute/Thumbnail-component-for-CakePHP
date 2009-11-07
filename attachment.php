@@ -11,11 +11,21 @@ class AttachmentComponent extends Object
 		'database'   => false,
 		'allow_non_image_files' => true,
 		'images_size' => array(
+			/* You may define as many options as you'd like */
 			'big'    => array(640, 480, false),
 			'med'    => array(263, 263, true),
 			'small'  => array( 90,  90, true)
 		)
 	);
+
+	/*
+	 * initialize method. Permits overriding configuration options (example):
+	 * var $components = array('Attachment' => array('photos_dir' => 'photos_path'));
+	 */
+	function initialize(&$controller, $config) {
+		$this->controller = $controller;
+		$this->config = array_merge($this->config, $config);
+	}
 
 	/*
 	* Uploads file to either database or file system, according to $config.
