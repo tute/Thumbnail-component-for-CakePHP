@@ -11,7 +11,7 @@ class AttachmentComponent extends Object
 		'database'   => false,
 		'allow_non_image_files' => true,
 		'images_size' => array(
-			/* You may define as many options as you'd like */
+			/* You may define as many options as you like */
 			'big'    => array(640, 480, false),
 			'med'    => array(263, 263, true),
 			'small'  => array( 90,  90, true)
@@ -120,14 +120,8 @@ class AttachmentComponent extends Object
 		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
 		$file_name = end(split(DS, $tmpfile));
-		$resizedfile = $upload_dir.DS.$file_name[2];
-
-		if (!$crop)
-			/* Only resize */
-			$this->resizeImage('resize', $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 85);
-		else
-			/* Resize and crop */
-			$this->resizeImage('resizeCrop', $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 75);
+		$action = ($crop ? 'resizeCrop' : 'resize');
+		$this->resizeImage($action, $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 85);
 	}
 
 
@@ -140,9 +134,9 @@ class AttachmentComponent extends Object
 	*	filename: The file name of the image
 	*/
 	function delete_files($filename) {
-		if(is_file(WWW_ROOT.'attachments'.DS.'files'.DS.$filename))
+		if(is_file(WWW_ROOT.'attachments'.DS.'files'.DS.$filename)) {
 			unlink(WWW_ROOT.'attachments'.DS.'files'.DS.$filename);
-
+		}
 		foreach ($this->config['images_size'] as $size => $opts) {
 			$photo = WWW_ROOT.'attachments'.DS.$this->config['photos_dir'].DS.$size.DS.$filename;
 			if (is_file($photo)) unlink($photo);
@@ -307,15 +301,15 @@ class AttachmentComponent extends Object
 		}
 	}
 
-
-	function is_image($filetype) {
-		$filetype = strtolower($filetype);
-		return (($filetype == 'jpeg')  or ($filetype == 'jpg') or ($filetype == 'gif') or ($filetype == 'png'));
+	function is_image($file_type) {
+		$image_types = array('jpeg', 'jpg', 'gif', 'png');
+		return in_array(strtolower($file_type), $image_types);
 	}
 
-
 	function image_type_to_extension($imagetype) {
-		if(empty($imagetype)) return false;
+		if (empty($imagetype)) {
+			return false;
+		}
 		switch($imagetype) {
 			case IMAGETYPE_GIF    : return 'gif';
 			case IMAGETYPE_JPEG   : return 'jpg';

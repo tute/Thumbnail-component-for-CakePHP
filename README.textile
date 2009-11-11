@@ -42,15 +42,15 @@ h2. Configuration options
 * @database@: Whether to save the images in the database or the filesystem.
 * @allow_non_image_files@, self descriptive ;-) .
 * @images_size@: Array of different file sizes required by your app. Each
-  element is itself an array like like the following one:
+  element is itself an array, like:
     @'folder_name' => array($width, $height, $do_crop)@.
 
-Yo may override the default configuration by passing an array of options
-while including the component:
-@var $components = array('Attachment' => array(/* options */));@
+Yo can override the default configuration passing an array of options while
+including the component, like:
+@var $components = array('Attachment' => array('photos_dir' => 'pets'));@
 
-(You may check the @$config@ array defined at the first lines of the
-component, to see default values and the syntax for overriding them.)
+(Check the @$config@ array defined at the first lines of the component to see
+default values and the syntax.)
 
 
 h2. Methods
