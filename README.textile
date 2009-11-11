@@ -45,7 +45,7 @@ h2. Configuration options
   element is itself an array, like:
     @'folder_name' => array($width, $height, $do_crop)@.
 
-Yo can override the default configuration passing an array of options while
+You can override the default configuration passing an array of options while
 including the component, like:
 @var $components = array('Attachment' => array('photos_dir' => 'pets'));@
 
@@ -68,7 +68,7 @@ h3. thumbnail($data, $upload_dir, $maxw, $maxh, $crop = false)
 
 h3. delete_files($filename)
 
-* @filename@: file to delete name
+* @filename@: file-to-delete name
 
 h2. Requirements
 
@@ -81,4 +81,3 @@ h2. Requirements
 h2. To do list
 
 * Image resize in upload_DB.
-

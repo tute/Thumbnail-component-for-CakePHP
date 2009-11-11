@@ -19,9 +19,9 @@ class AttachmentComponent extends Object
 	);
 
 	/*
-	 * initialize method. Permits overriding configuration options (example):
-	 * var $components = array('Attachment' => array('photos_dir' => 'photos_path'));
-	 */
+	* initialize method. Permits overriding configuration options (example):
+	* var $components = array('Attachment' => array('photos_dir' => 'photos_path'));
+	*/
 	function initialize(&$controller, $config) {
 		$this->controller = $controller;
 		$this->config = array_merge($this->config, $config);
@@ -104,16 +104,16 @@ class AttachmentComponent extends Object
 	}
 
 	/*
-	 * Creates resized copies of input image
-	 * Example usage:
-	 *	$this->Attachment->thumbnail($this->data['Model']['Attachment'], $upload_dir, 640, 480, false);
-	 *
-	 * Parameters:
-	 *	tmpfile: the image data array from the form
-	 *	upload_dir: the name of the parent folder of the images
-	 *	maxw/maxh: maximum width/height for resizing thumbnails
-	 *	crop: indicates if image must be cropped or not
-	 */
+	* Creates resized copies of input image
+	* Example usage:
+	*	$this->Attachment->thumbnail($this->data['Model']['Attachment'], $upload_dir, 640, 480, false);
+	*
+	* Parameters:
+	*	tmpfile: the image data array from the form
+	*	upload_dir: the name of the parent folder of the images
+	*	maxw/maxh: maximum width/height for resizing thumbnails
+	*	crop: indicates if image must be cropped or not
+	*/
 	function thumbnail($tmpfile, $upload_dir, $maxw, $maxh, $crop = false) {
 		// Make sure the required directory exist; create it if necessary
 		$upload_dir = WWW_ROOT.'attachments'.DS.$this->config['photos_dir'].DS.$upload_dir;
@@ -128,7 +128,7 @@ class AttachmentComponent extends Object
 	/*
 	* Deletes file, or image and associated thumbnail
 	* Example usage:
-	*	this->Attachment->delete_files('1210632285.jpg');
+	*	$this->Attachment->delete_files('file_name.jpg');
 	*
 	* Parameters:
 	*	filename: The file name of the image
