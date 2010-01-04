@@ -1,6 +1,7 @@
 <?php
 /*
 * File: /app/controllers/components/attachment.php
+*   A file uploader and thumbnailer component for CakePHP
 */
 
 class AttachmentComponent extends Object
@@ -19,8 +20,8 @@ class AttachmentComponent extends Object
 	);
 
 	/*
-	* initialize method. Permits overriding configuration options (example):
-	* var $components = array('Attachment' => array('photos_dir' => 'photos_path'));
+	* Initialization method. You may override configuration options while
+	* including it:
 	*/
 	function initialize(&$controller, $config) {
 		$this->controller = $controller;
@@ -119,7 +120,9 @@ class AttachmentComponent extends Object
 		$upload_dir = WWW_ROOT.'attachments'.DS.$this->config['photos_dir'].DS.$upload_dir;
 		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
-		$file_name = end(split(DS, $tmpfile));
+		/* Directory Separator for windows users */
+		$ds = (strcmp('\\', DS) == 0) ? '\\\\' : DS;
+		$file_name = end(split($ds, $tmpfile));
 		$action = ($crop ? 'resizeCrop' : 'resize');
 		$this->resizeImage($action, $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 85);
 	}
