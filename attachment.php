@@ -275,6 +275,8 @@ class AttachmentComponent extends Object
 				// Create new image
 				$newImage = imagecreatetruecolor($applyWidth, $applyHeight);
 				// Put old image on top of new image
+				imagealphablending($newImage, false);
+				imagesavealpha($newImage, true);
 				imagecopyresampled($newImage, $oldImage, 0, 0, $startX, $startY, $applyWidth, $applyHeight, $oldWidth, $oldHeight);
 
 				switch($ext) {
