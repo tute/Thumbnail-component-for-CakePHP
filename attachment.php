@@ -3,7 +3,6 @@
 * File: /app/controllers/components/attachment.php
 *   A file uploader and thumbnailer component for CakePHP
 */
-
 class AttachmentComponent extends Object
 {
 	/* Configuration options */
@@ -124,7 +123,7 @@ class AttachmentComponent extends Object
 		$ds = (strcmp('\\', DS) == 0) ? '\\\\' : DS;
 		$file_name = end(split($ds, $tmpfile));
 		$action = ($crop ? 'resizeCrop' : 'resize');
-		$this->resizeImage($action, $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 85);
+		$this->resize_image($action, $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 85);
 	}
 
 
@@ -137,7 +136,7 @@ class AttachmentComponent extends Object
 	*	filename: The file name of the image
 	*/
 	function delete_files($filename) {
-		if(is_file(WWW_ROOT.'attachments'.DS.'files'.DS.$filename)) {
+		if (is_file(WWW_ROOT.'attachments'.DS.'files'.DS.$filename)) {
 			unlink(WWW_ROOT.'attachments'.DS.'files'.DS.$filename);
 		}
 		foreach ($this->config['images_size'] as $size => $opts) {
@@ -157,7 +156,7 @@ class AttachmentComponent extends Object
 	*	newHeight: the max height or crop height
 	*	quality: the quality of the image
 	*/
-	function resizeImage($cType = 'resize', $tmpfile, $dstfolder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75) {
+	function resize_image($cType = 'resize', $tmpfile, $dstfolder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75) {
 		$srcimg = $tmpfile;
 		list($oldWidth, $oldHeight, $type) = getimagesize($srcimg);
 		$ext = $this->image_type_to_extension($type);
@@ -167,15 +166,15 @@ class AttachmentComponent extends Object
 			$dstimg = $dstfolder.DS.$dstname;
 		} else {
 			// if dirFolder not writeable, let developer know
-			debug("You must allow proper permissions for image processing. And the folder has to be writable.");
+			debug('You must allow proper permissions for image processing. And the folder has to be writable.');
 			debug("Run 'chmod 755 $dstfolder', and make sure the web server is it's owner.");
 			exit();
 		}
 
-		// Check if something is requested, otherwise do not resize
+		/* Check if something is requested, otherwise do not resize */
 		if ($newWidth or $newHeight) {
-			/* If tmp file exists, delete it */
-			if(file_exists($dstimg)) {
+			/* Delete tmp file if it exists */
+			if (file_exists($dstimg)) {
 				unlink($dstimg);
 			} else {
 				switch ($cType) {
@@ -183,37 +182,37 @@ class AttachmentComponent extends Object
 				case 'resize':
 					// Maintains the aspect ratio of the image and makes sure
 					// that it fits within the maxW and maxH
-					$widthScale = 2;
+					$widthScale  = 2;
 					$heightScale = 2;
 
-					// Check to see over-resizing, or set new scale
-					if($newWidth) {
-						if($newWidth > $oldWidth) $newWidth = $oldWidth;
-						$widthScale = 	$newWidth / $oldWidth;
+					/* Check if we're overresizing (or set new scale) */
+					if ($newWidth) {
+						if ($newWidth > $oldWidth) $newWidth = $oldWidth;
+						$widthScale = $newWidth / $oldWidth;
 					}
-					if($newHeight) {
-						if($newHeight > $oldHeight) $newHeight = $oldHeight;
+					if ($newHeight) {
+						if ($newHeight > $oldHeight) $newHeight = $oldHeight;
 						$heightScale = $newHeight / $oldHeight;
 					}
-					if($widthScale < $heightScale) {
-						$maxWidth = $newWidth;
+					if ($widthScale < $heightScale) {
+						$maxWidth  = $newWidth;
 						$maxHeight = false;
 					} elseif ($widthScale > $heightScale ) {
 						$maxHeight = $newHeight;
-						$maxWidth = false;
+						$maxWidth  = false;
 					} else {
 						$maxHeight = $newHeight;
-						$maxWidth = $newWidth;
+						$maxWidth  = $newWidth;
 					}
 
-					if($maxWidth > $maxHeight){
-						$applyWidth = $maxWidth;
+					if ($maxWidth > $maxHeight){
+						$applyWidth  = $maxWidth;
 						$applyHeight = ($oldHeight*$applyWidth)/$oldWidth;
 					} elseif ($maxHeight > $maxWidth) {
 						$applyHeight = $maxHeight;
-						$applyWidth = ($applyHeight*$oldWidth)/$oldHeight;
+						$applyWidth  = ($applyHeight*$oldWidth)/$oldHeight;
 					} else {
-						$applyWidth = $maxWidth;
+						$applyWidth  = $maxWidth;
 						$applyHeight = $maxHeight;
 					}
 					$startX = 0;
@@ -221,26 +220,26 @@ class AttachmentComponent extends Object
 					break;
 
 				case 'resizeCrop':
-					// Check to see that we are not over resizing, otherwise, set the new scale
-					// -- resize to max, then crop to center
-					if($newWidth > $oldWidth) $newWidth = $oldWidth;
+					/* Check if we're overresizing (or set new scale) */
+					/* resize to max, then crop to center */
+					if ($newWidth > $oldWidth) $newWidth = $oldWidth;
 						$ratioX = $newWidth / $oldWidth;
 
-					if($newHeight > $oldHeight) $newHeight = $oldHeight;
+					if ($newHeight > $oldHeight) $newHeight = $oldHeight;
 						$ratioY = $newHeight / $oldHeight;
 
 					if ($ratioX < $ratioY) {
 						$startX = round(($oldWidth - ($newWidth / $ratioY))/2);
 						$startY = 0;
-						$oldWidth = round($newWidth / $ratioY);
+						$oldWidth  = round($newWidth / $ratioY);
 						$oldHeight = $oldHeight;
 					} else {
 						$startX = 0;
 						$startY = round(($oldHeight - ($newHeight / $ratioX))/2);
-						$oldWidth = $oldWidth;
+						$oldWidth  = $oldWidth;
 						$oldHeight = round($newHeight / $ratioX);
 					}
-					$applyWidth = $newWidth;
+					$applyWidth  = $newWidth;
 					$applyHeight = $newHeight;
 					break;
 
@@ -248,10 +247,10 @@ class AttachmentComponent extends Object
 					// straight centered crop
 					$startY = ($oldHeight - $newHeight)/2;
 					$startX = ($oldWidth - $newWidth)/2;
-					$oldHeight = $newHeight;
+					$oldHeight   = $newHeight;
 					$applyHeight = $newHeight;
-					$oldWidth = $newWidth;
-					$applyWidth = $newWidth;
+					$oldWidth    = $newWidth;
+					$applyWidth  = $newWidth;
 					break;
 				}
 
@@ -297,11 +296,9 @@ class AttachmentComponent extends Object
 
 				imagedestroy($newImage);
 				imagedestroy($oldImage);
-
 				return true;
 			}
-
-		} else {
+		} else { /* Nothing requested */
 			return false;
 		}
 	}
@@ -312,9 +309,7 @@ class AttachmentComponent extends Object
 	}
 
 	function image_type_to_extension($imagetype) {
-		if (empty($imagetype)) {
-			return false;
-		}
+		if (empty($imagetype)) return false;
 		switch($imagetype) {
 			case IMAGETYPE_GIF    : return 'gif';
 			case IMAGETYPE_JPEG   : return 'jpg';

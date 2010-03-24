@@ -81,3 +81,5 @@ h2. Requirements
 h2. To do list
 
 * Image resize in upload_DB.
+* Show options for not resizing (or scaling with only one value) images.
+* Make @$do_crop@ a string instead of a bool to let it use the three options.
