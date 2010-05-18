@@ -14,10 +14,31 @@ h2. Usage
 # Add component to your controller: @var $components = array('Attachment');@
 # In your upload form:
 ## @echo $form->create('Model', array('type' => 'file'));@
-## @echo $form->file('Attachment');@
+## @echo $form->file('pet'); // pet is the lower case model-name@
 
 
 h3. Filesystem storage (default)
+
+h4. v0.6:
+
+The API has evolved to simplify the component usage, but now there are new
+assumptions on the attachments table. We'll asume a Model named 'Pet' for a
+sample installation.
+
+The code relies on four columns: @photo_file_path, photo_file_name,
+photo_file_size@ and @photo_content_type@, which are automagically
+updated when you call from the controller *before the save action*:
+
+@$this->Attachment->upload($this->data['Pet']);@
+
+If you are upgrading from v0.5 take note of the following:
+* Configuration option @photos_dir@ is now @files_dir@.
+* Configuration option @database@ is now @save_in_db@.
+* You may need to tweak your database schema (not necessarily though).
+
+If you used default options the upgrade may be seamless.
+
+h4. v0.5 (legacy):
 
 # In your controller action (save @file_path@):
   @$file_path = $this->Attachment->upload($this->data['Model']['Attachment']);@
@@ -25,46 +46,50 @@ h3. Filesystem storage (default)
   @<?= $html->image('/attachments/$folderName/{size}/'.$data['Model']['file_path']); ?>@
 
 
-h3. Database storage
+h3. Database storage (not working right now)
 
 # Change @$config['database'] = true@ in attachment.php.
 # In your controller action:
   @$binary_data = $this->Attachment->upload($this->data['Model']['Attachment']);@
 # Save @$binary_data@ to database binary column:
-  @$this->data['Model']['file_contents'] = $binary_data@
+  @$this->data['Model']['file_contents'] = $binary_data;@
 
 (No image processing yet, to-do!)
 
 
-h2. Configuration options
+h2. Configuration options (v0.6)
 
-* @photos_dir@: The folder which will hold the files, inside @/app/webroot/attachments/@.
-* @database@: Whether to save the images in the database or the filesystem.
-* @allow_non_image_files@, self descriptive ;-) .
+Default values between parentheses:
+
+* @files_dir@: Where to save the files (inside @/app/webroot/attachments/@) (@photos@).
+* @save_in_db@: Save the images in the database or the filesystem (@false@).
+* @allow_non_image_files@, self descriptive ;-) (@true@).
+* @default_col@: Column prefix for file related data (lowercase modelname).
 * @images_size@: Array of different file sizes required by your app. Each
   element is itself an array, like:
     @'folder_name' => array($width, $height, $do_crop)@.
 
 You can override the default configuration passing an array of options while
 including the component, like:
-@var $components = array('Attachment' => array('photos_dir' => 'pets'));@
-
-(Check the @$config@ array defined at the first lines of the component to see
-default values and the syntax.)
-
+@var $components = array('Attachment' => array(
+	'files_dir' => 'pets',
+	'images_size' => array(
+		'avatar'  => array(75, 75, true)
+	)
+));@
 
 h2. Methods
 
 h3. upload($data)
 
-* @data@: file data array from the form. If it's an image, it calls:
+* @data@: raw data from form. If it's an image, it calls:
 
 h3. thumbnail($data, $upload_dir, $maxw, $maxh, $crop = false)
 
-* @data@: the image data array from the form
-* @upload_dir@: the name of the parent folder of the images
+* @data@: image data array
+* @upload_dir@: where to save the file (inside @attachments/files_dir@)
 * @maxw/maxh@: maximum width/height for resizing images
-* @crop@: indicates if image must be cropped or not (defaults to @false@)
+* @crop@: Crop image? (defaults to @false@)
 
 h3. delete_files($filename)
 
@@ -73,14 +98,12 @@ h3. delete_files($filename)
 h2. Requirements
 
 * PHP GD library installed and enabled
-* @/app/webroot/@ must be writable by the web server (or you can create
-  @/app/webroot/attachments/@ and make writable that folder).
-* You must store in database @$file_path@ returned by
-  @$this->Attachment->upload@ in order to reference the file.
+* @/app/webroot/attachments/@ must be writable by the web server.
 
 h2. To do list
 
-* Image resize in upload_DB.
 * Show options for not resizing (or scaling with only one value) images.
 * Make @$do_crop@ a string instead of a bool to let it use the three options.
-* http://www.phpriot.com/articles/images-in-mysql/8
+* For database uploading:
+** Do image resizing.
+** Option to show or download database files.

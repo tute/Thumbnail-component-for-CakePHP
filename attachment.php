@@ -7,9 +7,9 @@ class AttachmentComponent extends Object
 {
 	/* Configuration options */
 	var $config = array(
-		'photos_dir' => 'photos',
-		'database'   => false,
-		'allow_non_image_files' => false,
+		'files_dir' => 'photos',
+		'save_in_db' => false,
+		'allow_non_image_files' => true,
 		'images_size' => array(
 			/* You may define as many options as you like */
 			'big'    => array(640, 480, false),
@@ -24,7 +24,12 @@ class AttachmentComponent extends Object
 	*/
 	function initialize(&$controller, $config) {
 		$this->controller = $controller;
-		$this->config = array_merge($this->config, $config);
+		$default_col = strtolower($controller->modelClass);
+		$this->config = array_merge(
+			array('default_col' => $default_col), /* default col name */
+			$this->config, /* default general configuration */
+			$config        /* overriden configurations */
+		);
 	}
 
 	/*
@@ -35,25 +40,29 @@ class AttachmentComponent extends Object
 	* Parameters:
 	*	data: the file input array
 	*/
-	function upload($data) {
-		if ($data['size'] == 0) {
+	function upload(&$data) {
+		if ($data[$this->config['default_col']]['size'] == 0) {
 			return false;
 		}
-		if ($this->config['database'] == false) {
-			return $this->upload_FS($data);
-		} else {
+		if ($this->config['save_in_db']) {
 			return $this->upload_DB($data);
+		} else {
+			return $this->upload_FS($data);
 		}
 	}
 
-	function upload_DB($data) {
+	function upload_DB(&$data) {
+		/*
 		$fp = fopen($data['tmp_name'], 'r');
 		$content = fread($fp, filesize($data['tmp_name']));
 		fclose($fp);
 		return addslashes($content);
+		*/
+		return false;
 	}
 
-	function upload_FS($data) {
+	function upload_FS(&$data) {
+		$def_col = $this->config['default_col'];
 		$error = 0;
 		$tmpuploaddir  = WWW_ROOT.'attachments'.DS.'tmp'; // /tmp/ folder (should delete image after upload)
 		$fileuploaddir = WWW_ROOT.'attachments'.DS.'files';
@@ -63,7 +72,7 @@ class AttachmentComponent extends Object
 		if (!is_dir($fileuploaddir)) mkdir($fileuploaddir, 0755, true);
 
 		/* Generate a unique name for the file */
-		$filetype = end(split('\.', $data['name']));
+		$filetype = end(split('\.', $data[$def_col]['name']));
 		$filename = String::uuid();
 		settype($filename, 'string');
 		$filename .= '.' . $filetype;
@@ -71,10 +80,10 @@ class AttachmentComponent extends Object
 		$filefile = $fileuploaddir.DS.$filename;
 
 		// Copy file in temporary directory
-		if (is_uploaded_file($data['tmp_name'])) {
+		if (is_uploaded_file($data[$def_col]['tmp_name'])) {
 			// If it's image, get image size, make thumbnails.
 			if ($this->is_image($filetype)) {
-				$this->copy_or_raise_error($data['tmp_name'], $tmpfile);
+				$this->copy_or_raise_error($data[$def_col]['tmp_name'], $tmpfile);
 				/* Create each thumbnail_size */
 				foreach ($this->config['images_size'] as $dir => $opts) {
 					$this->thumbnail($tmpfile,$dir,$opts[0],$opts[1],$opts[2]);
@@ -86,10 +95,16 @@ class AttachmentComponent extends Object
 					unset($filename);
 					exit('File type not allowed.');  /* Returns false */
 				}
-				$this->copy_or_raise_error($data['tmp_name'], $filefile);
+				$this->copy_or_raise_error($data[$def_col]['tmp_name'], $filefile);
 			}
-			/* File uploaded, return it's name */
-			return $filename;
+			/* File uploaded, return modified data array */
+			$r[$def_col.'_file_path'] = $filename;
+			$r[$def_col.'_file_name'] = $data[$def_col]['name'];
+			$r[$def_col.'_file_size'] = $data[$def_col]['size'];
+			$r[$def_col.'_content_type'] = $data[$def_col]['type'];
+			unset($data[$def_col]); /* delete file indirection */
+			$data = array_merge($data, $r); /* add default fields */
+			return true;
 		}
 	}
 
@@ -106,7 +121,7 @@ class AttachmentComponent extends Object
 	*/
 	function thumbnail($tmpfile, $upload_dir, $maxw, $maxh, $crop = false) {
 		// Make sure the required directory exist; create it if necessary
-		$upload_dir = WWW_ROOT.'attachments'.DS.$this->config['photos_dir'].DS.$upload_dir;
+		$upload_dir = WWW_ROOT.'attachments'.DS.$this->config['files_dir'].DS.$upload_dir;
 		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
 		/* Directory Separator for windows users */
@@ -130,7 +145,7 @@ class AttachmentComponent extends Object
 			unlink(WWW_ROOT.'attachments'.DS.'files'.DS.$filename);
 		}
 		foreach ($this->config['images_size'] as $size => $opts) {
-			$photo = WWW_ROOT.'attachments'.DS.$this->config['photos_dir'].DS.$size.DS.$filename;
+			$photo = WWW_ROOT.'attachments'.DS.$this->config['files_dir'].DS.$size.DS.$filename;
 			if (is_file($photo)) unlink($photo);
 		}
 	}
