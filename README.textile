@@ -19,19 +19,20 @@ h2. Usage
 
 h3. Filesystem storage (default)
 
-On version 0.6 the API has evolved to simplify the component usage, but now
-there are new assumptions on the attachments table. We'll asume a Model named
-'Pet' for a sample installation.
+On version 0.6 the API has evolved to simplify the component usage, with some
+new assumptions on the attachments table. We'll asume a Model named 'Pet' for
+a sample installation.
 
-The code relies on four columns: @photo_file_path, photo_file_name,
-photo_file_size@ and @photo_content_type@, which are automagically updated
-when you call from the controller *(before the save action)*:
+The code relies on four columns: @pet_file_path, pet_file_name, pet_file_size@
+and @pet_content_type@, which are automagically updated when you call from
+the controller *(before @save()@ action)*:
 
 @$this->Attachment->upload($this->data['Pet']);@
 
-You can display the file in the view (if it's an image) with following code:
+You can access the files from the view with the following lines:
 
-@<?= $html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@
+Image: @<?= $html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@
+File:  @<?= $html->link('Grab file', '/attachments/files_dir/' . $data['Pet']['pet_file_path']); ?>@
 
 If you are upgrading from v0.5 take note of the following:
 * Configuration option @photos_dir@ is now @files_dir@.
