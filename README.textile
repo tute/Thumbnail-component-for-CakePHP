@@ -19,17 +19,19 @@ h2. Usage
 
 h3. Filesystem storage (default)
 
-h4. v0.6:
-
-The API has evolved to simplify the component usage, but now there are new
-assumptions on the attachments table. We'll asume a Model named 'Pet' for a
-sample installation.
+On version 0.6 the API has evolved to simplify the component usage, but now
+there are new assumptions on the attachments table. We'll asume a Model named
+'Pet' for a sample installation.
 
 The code relies on four columns: @photo_file_path, photo_file_name,
-photo_file_size@ and @photo_content_type@, which are automagically
-updated when you call from the controller *before the save action*:
+photo_file_size@ and @photo_content_type@, which are automagically updated
+when you call from the controller *(before the save action)*:
 
 @$this->Attachment->upload($this->data['Pet']);@
+
+You can display the file in the view (if it's an image) with following code:
+
+@<?= $html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@
 
 If you are upgrading from v0.5 take note of the following:
 * Configuration option @photos_dir@ is now @files_dir@.
@@ -37,14 +39,6 @@ If you are upgrading from v0.5 take note of the following:
 * You may need to tweak your database schema (not necessarily though).
 
 If you used default options the upgrade may be seamless.
-
-h4. v0.5 (legacy):
-
-# In your controller action (save @file_path@):
-  @$file_path = $this->Attachment->upload($this->data['Model']['Attachment']);@
-# In your view, if it's an image:
-  @<?= $html->image('/attachments/$folderName/{size}/'.$data['Model']['file_path']); ?>@
-
 
 h3. Database storage (not working right now)
 
@@ -54,12 +48,7 @@ h3. Database storage (not working right now)
 # Save @$binary_data@ to database binary column:
   @$this->data['Model']['file_contents'] = $binary_data;@
 
-(No image processing yet, to-do!)
-
-
-h2. Configuration options (v0.6)
-
-Default values between parentheses:
+h2. Configuration options (default values between parentheses)
 
 * @files_dir@: Where to save the files (inside @/app/webroot/attachments/@) (@photos@).
 * @save_in_db@: Save the images in the database or the filesystem (@false@).
