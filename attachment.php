@@ -24,9 +24,8 @@ class AttachmentComponent extends Object
 	*/
 	function initialize(&$controller, $config) {
 		$this->controller = $controller;
-		$default_col = strtolower($controller->modelClass);
 		$this->config = array_merge(
-			array('default_col' => $default_col), /* default col name */
+			array('default_col' => strtolower($controller->modelClass)), /* columns prefix */
 			$this->config, /* default general configuration */
 			$config        /* overriden configurations */
 		);
@@ -79,33 +78,35 @@ class AttachmentComponent extends Object
 		$tmpfile  = $tmpuploaddir.DS.$filename;
 		$filefile = $fileuploaddir.DS.$filename;
 
-		// Copy file in temporary directory
-		if (is_uploaded_file($data[$def_col]['tmp_name'])) {
-			// If it's image, get image size, make thumbnails.
-			if ($this->is_image($filetype)) {
-				$this->copy_or_raise_error($data[$def_col]['tmp_name'], $tmpfile);
-				/* Create each thumbnail_size */
-				foreach ($this->config['images_size'] as $dir => $opts) {
-					$this->thumbnail($tmpfile,$dir,$opts[0],$opts[1],$opts[2]);
-				}
-				/* Remove temporary file */
-				unlink($tmpfile);
-			} else {
-				if ($this->config['allow_non_image_files'] != true) {
-					unset($filename);
-					exit('File type not allowed.');  /* Returns false */
-				}
-				$this->copy_or_raise_error($data[$def_col]['tmp_name'], $filefile);
-			}
-			/* File uploaded, return modified data array */
-			$r[$def_col.'_file_path'] = $filename;
-			$r[$def_col.'_file_name'] = $data[$def_col]['name'];
-			$r[$def_col.'_file_size'] = $data[$def_col]['size'];
-			$r[$def_col.'_content_type'] = $data[$def_col]['type'];
-			unset($data[$def_col]); /* delete file indirection */
-			$data = array_merge($data, $r); /* add default fields */
-			return true;
+		/* Security check */
+		if (!is_uploaded_file($data[$def_col]['tmp_name'])) {
+			exit('Error uploading file (sure it was a POST request?).');
 		}
+
+		/* If it's image get image size and make thumbnail copies. */
+		if ($this->is_image($filetype)) {
+			$this->copy_or_raise_error($data[$def_col]['tmp_name'], $tmpfile);
+			/* Create each thumbnail_size */
+			foreach ($this->config['images_size'] as $dir => $opts) {
+				$this->thumbnail($tmpfile,$dir,$opts[0],$opts[1],$opts[2]);
+			}
+			unlink($tmpfile);
+		} else {
+			if (!$this->config['allow_non_image_files']) {
+				exit('File type not allowed.');
+			}
+			$this->copy_or_raise_error($data[$def_col]['tmp_name'], $filefile);
+		}
+
+		/* File uploaded, return modified data array */
+		$res[$def_col.'_file_path'] = $filename;
+		$res[$def_col.'_file_name'] = $data[$def_col]['name'];
+		$res[$def_col.'_file_size'] = $data[$def_col]['size'];
+		$res[$def_col.'_content_type'] = $data[$def_col]['type'];
+		unset($data[$def_col]); /* delete $_FILES indirection */
+		$data = array_merge($data, $res); /* add default fields */
+
+		return true;
 	}
 
 	/*
