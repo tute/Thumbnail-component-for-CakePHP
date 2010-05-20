@@ -41,16 +41,13 @@ class AttachmentComponent extends Object
 	*/
 	function upload(&$data) {
 		$file = $data[$this->config['default_col']];
-		if ($file['error'] > 0) {
-			return false; /* Error while uploading file. */
-		} elseif ($file['size'] == 0) {
-			return false; /* No file. */
-		}
-		if ($this->config['save_in_db']) {
-			return $this->upload_DB($data);
-		} else {
-			return $this->upload_FS($data);
-		}
+		if ($file['error'] === UPLOAD_ERR_OK) {
+			if ($this->config['save_in_db'])
+				return $this->upload_DB($data);
+			else
+				return $this->upload_FS($data);
+		} else
+			$this->log_error_and_exit($file['error']);
 	}
 
 	function upload_DB(&$data) {
@@ -312,6 +309,8 @@ class AttachmentComponent extends Object
 		}
 	}
 
+	/* Many helper functions */
+
 	function copy_or_raise_error($tmp_name, $filefile) {
 		if (!copy($tmp_name, $filefile)) {
 			unset($filename);
@@ -322,6 +321,36 @@ class AttachmentComponent extends Object
 	function is_image($file_type) {
 		$image_types = array('jpeg', 'jpg', 'gif', 'png');
 		return in_array(strtolower($file_type), $image_types);
+	}
+
+	function log_error_and_exit($err_code) {
+		switch ($err_code) {
+			case UPLOAD_ERR_INI_SIZE:
+				$e = 'The uploaded file exceeds the upload_max_filesize directive in php.ini.';
+				break;
+			case UPLOAD_ERR_FORM_SIZE:
+				$e = 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.';
+				break;
+			case UPLOAD_ERR_PARTIAL:
+				$e = 'The uploaded file was only partially uploaded.';
+				break;
+			case UPLOAD_ERR_NO_FILE:
+				$e = 'No file was uploaded.';
+				break;
+			case UPLOAD_ERR_NO_TMP_DIR:
+				$e = 'Missing a temporary folder.';
+				break;
+			case UPLOAD_ERR_CANT_WRITE:
+				$e = 'Failed to write file to disk.';
+				break;
+			case UPLOAD_ERR_EXTENSION:
+				$e = 'File upload stopped by extension.';
+				break;
+			default:
+				$e = 'Unknown upload error.';
+		}
+		$this->log($e, 'attachment-component');
+		exit($e);
 	}
 
 	function image_type_to_extension($imagetype) {
