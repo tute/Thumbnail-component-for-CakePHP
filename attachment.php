@@ -40,8 +40,11 @@ class AttachmentComponent extends Object
 	*	data: the file input array
 	*/
 	function upload(&$data) {
-		if ($data[$this->config['default_col']]['size'] == 0) {
-			return false;
+		$file = $data[$this->config['default_col']];
+		if ($file['error'] > 0) {
+			return false; /* Error while uploading file. */
+		} elseif ($file['size'] == 0) {
+			return false; /* No file. */
 		}
 		if ($this->config['save_in_db']) {
 			return $this->upload_DB($data);
