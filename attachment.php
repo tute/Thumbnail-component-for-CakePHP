@@ -325,6 +325,8 @@ class AttachmentComponent extends Object
 
 	function log_error_and_exit($err_code) {
 		switch ($err_code) {
+			case UPLOAD_ERR_NO_FILE:
+				return 0;
 			case UPLOAD_ERR_INI_SIZE:
 				$e = 'The uploaded file exceeds the upload_max_filesize directive in php.ini.';
 				break;
@@ -333,9 +335,6 @@ class AttachmentComponent extends Object
 				break;
 			case UPLOAD_ERR_PARTIAL:
 				$e = 'The uploaded file was only partially uploaded.';
-				break;
-			case UPLOAD_ERR_NO_FILE:
-				$e = 'No file was uploaded.';
 				break;
 			case UPLOAD_ERR_NO_TMP_DIR:
 				$e = 'Missing a temporary folder.';
