@@ -7,8 +7,9 @@ class AttachmentComponent extends Object
 {
 	/* Configuration options */
 	var $config = array(
-		'files_dir' => 'photos',
-		'save_in_db' => false,
+		'files_dir'   => 'photos',
+		'rm_tmp_file' => false,
+		'save_in_db'  => false,
 		'allow_non_image_files' => true,
 		'images_size' => array(
 			/* You may define as many options as you like */
@@ -90,7 +91,8 @@ class AttachmentComponent extends Object
 			foreach ($this->config['images_size'] as $dir => $opts) {
 				$this->thumbnail($tmpfile,$dir,$opts[0],$opts[1],$opts[2]);
 			}
-			unlink($tmpfile);
+			if ($this->config['rm_tmp_file'])
+				unlink($tmpfile);
 		} else {
 			if (!$this->config['allow_non_image_files']) {
 				exit('File type not allowed.');

@@ -52,6 +52,7 @@ h3. Database storage (not working right now)
 h2. Configuration options (default values between parentheses)
 
 * @files_dir@: Where to save the files (inside @/app/webroot/attachments/@) (@photos@).
+* @rm_tmp_file@: Remove temporal image after resizing (@false@).
 * @save_in_db@: Save the images in the database or the filesystem (@false@).
 * @allow_non_image_files@, self descriptive ;-) (@true@).
 * @default_col@: Column prefix for file related data (lowercase modelname).
