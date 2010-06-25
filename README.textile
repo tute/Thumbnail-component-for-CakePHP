@@ -29,6 +29,11 @@ the controller *(before @save()@ action)*:
 
 @$this->Attachment->upload($this->data['Pet']);@
 
+You may choose different column prefixes than the model name, as long as you
+specify it on the upload method, like so:
+
+@$this->Attachment->upload($this->data['Pet'], 'dog');@
+
 You can access the files from the view with the following lines:
 
 Image: @<?= $html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@

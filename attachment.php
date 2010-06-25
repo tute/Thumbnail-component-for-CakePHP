@@ -40,13 +40,14 @@ class AttachmentComponent extends Object
 	* Parameters:
 	*	data: the file input array
 	*/
-	function upload(&$data) {
-		$file = $data[$this->config['default_col']];
+	function upload(&$data, $column_prefix = null) {
+		if ($column_prefix == null) $column_prefix = $this->config['default_col'];
+		$file = $data[$column_prefix];
 		if ($file['error'] === UPLOAD_ERR_OK) {
 			if ($this->config['save_in_db'])
-				return $this->upload_DB($data);
+				return $this->upload_DB($data, $column_prefix);
 			else
-				return $this->upload_FS($data);
+				return $this->upload_FS($data, $column_prefix);
 		} else
 			$this->log_error_and_exit($file['error']);
 	}
@@ -61,8 +62,8 @@ class AttachmentComponent extends Object
 		return false;
 	}
 
-	function upload_FS(&$data) {
-		$def_col = $this->config['default_col'];
+	function upload_FS(&$data, $column_prefix) {
+		if ($column_prefix == null) $column_prefix = $this->config['default_col'];
 		$error = 0;
 		$tmpuploaddir  = WWW_ROOT.'attachments'.DS.'tmp'; // /tmp/ folder (should delete image after upload)
 		$fileuploaddir = WWW_ROOT.'attachments'.DS.'files';
@@ -72,7 +73,7 @@ class AttachmentComponent extends Object
 		if (!is_dir($fileuploaddir)) mkdir($fileuploaddir, 0755, true);
 
 		/* Generate a unique name for the file */
-		$filetype = end(split('\.', $data[$def_col]['name']));
+		$filetype = end(split('\.', $data[$column_prefix]['name']));
 		$filename = String::uuid();
 		settype($filename, 'string');
 		$filename .= '.' . $filetype;
@@ -80,13 +81,13 @@ class AttachmentComponent extends Object
 		$filefile = $fileuploaddir.DS.$filename;
 
 		/* Security check */
-		if (!is_uploaded_file($data[$def_col]['tmp_name'])) {
+		if (!is_uploaded_file($data[$column_prefix]['tmp_name'])) {
 			exit('Error uploading file (sure it was a POST request?).');
 		}
 
 		/* If it's image get image size and make thumbnail copies. */
 		if ($this->is_image($filetype)) {
-			$this->copy_or_raise_error($data[$def_col]['tmp_name'], $tmpfile);
+			$this->copy_or_raise_error($data[$column_prefix]['tmp_name'], $tmpfile);
 			/* Create each thumbnail_size */
 			foreach ($this->config['images_size'] as $dir => $opts) {
 				$this->thumbnail($tmpfile,$dir,$opts[0],$opts[1],$opts[2]);
@@ -97,15 +98,16 @@ class AttachmentComponent extends Object
 			if (!$this->config['allow_non_image_files']) {
 				exit('File type not allowed.');
 			}
-			$this->copy_or_raise_error($data[$def_col]['tmp_name'], $filefile);
+			$this->copy_or_raise_error($data[$column_prefix]['tmp_name'], $filefile);
+			//unlink($tmpfile);
 		}
 
 		/* File uploaded, return modified data array */
-		$res[$def_col.'_file_path'] = $filename;
-		$res[$def_col.'_file_name'] = $data[$def_col]['name'];
-		$res[$def_col.'_file_size'] = $data[$def_col]['size'];
-		$res[$def_col.'_content_type'] = $data[$def_col]['type'];
-		unset($data[$def_col]); /* delete $_FILES indirection */
+		$res[$column_prefix.'_file_path'] = $filename;
+		$res[$column_prefix.'_file_name'] = $data[$column_prefix]['name'];
+		$res[$column_prefix.'_file_size'] = $data[$column_prefix]['size'];
+		$res[$column_prefix.'_content_type'] = $data[$column_prefix]['type'];
+		unset($data[$column_prefix]); /* delete $_FILES indirection */
 		$data = array_merge($data, $res); /* add default fields */
 
 		return true;
