@@ -146,9 +146,15 @@ class AttachmentComponent extends Object
 	*	filename: The file name of the image
 	*/
 	function delete_files($filename) {
+		/* Non image files */
 		if (is_file(WWW_ROOT.'attachments'.DS.'files'.DS.$filename)) {
 			unlink(WWW_ROOT.'attachments'.DS.'files'.DS.$filename);
 		}
+		/* tmp files (if not pruned while uploading) */
+		if (is_file(WWW_ROOT.'attachments'.DS.'tmp'.DS.$filename)) {
+			unlink(WWW_ROOT.'attachments'.DS.'tmp'.DS.$filename);
+		}
+		/* Thumbnail copies */
 		foreach ($this->config['images_size'] as $size => $opts) {
 			$photo = WWW_ROOT.'attachments'.DS.$this->config['files_dir'].DS.$size.DS.$filename;
 			if (is_file($photo)) unlink($photo);
