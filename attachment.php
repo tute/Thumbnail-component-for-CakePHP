@@ -13,9 +13,9 @@ class AttachmentComponent extends Object
 		'allow_non_image_files' => true,
 		'images_size' => array(
 			/* You may define as many options as you like */
-			'big'    => array(640, 480, false),
-			'med'    => array(263, 263, true),
-			'small'  => array( 90,  90, true)
+			'big'    => array(640, 480, 'resize'),
+			'med'    => array(263, 263, 'resizeCrop'),
+			'small'  => array( 90,  90, 'resizeCrop')
 		)
 	);
 
@@ -99,7 +99,6 @@ class AttachmentComponent extends Object
 				exit('File type not allowed.');
 			}
 			$this->copy_or_raise_error($data[$column_prefix]['tmp_name'], $filefile);
-			//unlink($tmpfile);
 		}
 
 		/* File uploaded, return modified data array */
@@ -122,9 +121,9 @@ class AttachmentComponent extends Object
 	*	tmpfile: the image data array from the form
 	*	upload_dir: the name of the parent folder of the images
 	*	maxw/maxh: maximum width/height for resizing thumbnails
-	*	crop: indicates if image must be cropped or not
+	*	crop: one of resize, resizeCrop or crop
 	*/
-	function thumbnail($tmpfile, $upload_dir, $maxw, $maxh, $crop = false) {
+	function thumbnail($tmpfile, $upload_dir, $maxw, $maxh, $crop = 'resize') {
 		// Make sure the required directory exist; create it if necessary
 		$upload_dir = WWW_ROOT.'attachments'.DS.$this->config['files_dir'].DS.$upload_dir;
 		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
@@ -132,8 +131,7 @@ class AttachmentComponent extends Object
 		/* Directory Separator for windows users */
 		$ds = (strcmp('\\', DS) == 0) ? '\\\\' : DS;
 		$file_name = end(split($ds, $tmpfile));
-		$action = ($crop ? 'resizeCrop' : 'resize');
-		$this->resize_image($action, $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 85);
+		$this->resize_image($crop, $tmpfile, $upload_dir, $file_name, $maxw, $maxh, 85);
 	}
 
 

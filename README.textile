@@ -63,7 +63,7 @@ h2. Configuration options (default values between parentheses)
 * @default_col@: Column prefix for file related data (lowercase modelname).
 * @images_size@: Array of different file sizes required by your app. Each
   element is itself an array, like:
-    @'folder_name' => array($width, $height, $do_crop)@.
+    @'folder_name' => array($width, $height, $crop)@.
 
 You can override the default configuration passing an array of options while
 including the component, like:
@@ -80,12 +80,12 @@ h3. upload($data)
 
 * @data@: raw data from form. If it's an image, it calls:
 
-h3. thumbnail($data, $upload_dir, $maxw, $maxh, $crop = false)
+h3. thumbnail($data, $upload_dir, $maxw, $maxh, $crop = 'resize')
 
 * @data@: image data array
 * @upload_dir@: where to save the file (inside @attachments/files_dir@)
 * @maxw/maxh@: maximum width/height for resizing images
-* @crop@: Crop image? (defaults to @false@)
+* @crop@: Crop image? (one of @resize@, @resizeCrop@ or @crop@)
 
 h3. delete_files($filename)
 
@@ -99,7 +99,6 @@ h2. Requirements
 h2. To do list
 
 * Show options for not resizing (or scaling with only one value) images.
-* Make @$do_crop@ a string instead of a bool to let it use the three options.
 * For database uploading:
 ** Do image resizing.
 ** Option to show or download database files.
