@@ -64,6 +64,7 @@ h2. Configuration options (default values between parentheses)
 * @images_size@: Array of different file sizes required by your app. Each
   element is itself an array, like:
     @'folder_name' => array($width, $height, $crop)@.
+  You may define only width or height, and the image will scale appropriately.
 
 You can override the default configuration passing an array of options while
 including the component, like:
@@ -93,12 +94,11 @@ h3. delete_files($filename)
 
 h2. Requirements
 
-* PHP GD library installed and enabled
+* PHP GD library installed and enabled.
 * @/app/webroot/attachments/@ must be writable by the web server.
 
 h2. To do list
 
-* Show options for not resizing (or scaling with only one value) images.
 * For database uploading:
 ** Do image resizing.
 ** Option to show or download database files.
