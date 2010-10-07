@@ -354,7 +354,7 @@ class AttachmentComponent extends Object
 				$e = 'File upload stopped by extension.';
 				break;
 			default:
-				$e = 'Unknown upload error.';
+				$e = 'Unknown upload error. Did you add array(\'type\' => \'file\') to your form?';
 		}
 		$this->log($e, 'attachment-component');
 		exit($e);
