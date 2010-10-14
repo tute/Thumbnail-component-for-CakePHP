@@ -44,10 +44,7 @@ class AttachmentComponent extends Object
 		if ($column_prefix == null) $column_prefix = $this->config['default_col'];
 		$file = $data[$column_prefix];
 		if ($file['error'] === UPLOAD_ERR_OK) {
-			if ($this->config['save_in_db'])
-				return $this->upload_DB($data, $column_prefix);
-			else
-				return $this->upload_FS($data, $column_prefix);
+			return $this->upload_FS($data, $column_prefix);
 		} else
 			$this->log_error_and_exit($file['error']);
 	}

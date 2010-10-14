@@ -12,20 +12,15 @@ h2. Usage
 
 # Copy @attachment.php@ to @/app/controllers/components/@
 # Add component to your controller: @var $components = array('Attachment');@
+# Add DB columns (as noted below).
 # In your upload form:
 ## @echo $form->create('Model', array('type' => 'file'));@
 ## @echo $form->file('pet'); // pet is the lower case model-name@
 
-
-h3. Filesystem storage (default)
-
-On version 0.6 the API has evolved to simplify the component usage, with some
-new assumptions on the attachments table. We'll asume a Model named 'Pet' for
-a sample installation.
-
-The code relies on four columns: @pet_file_path, pet_file_name, pet_file_size@
-and @pet_content_type@, which are automagically updated when you call from
-the controller *(before @save()@ action)*:
+We'll asume a Model named 'Pet' for a sample installation. The code relies on
+four columns: @pet_file_path, pet_file_name, pet_file_size@ and
+@pet_content_type@, which are automagically updated when you call from the
+controller *(before @save()@ action)*:
 
 @$this->Attachment->upload($this->data['Pet']);@
 
@@ -41,24 +36,14 @@ File:  @<?= $html->link('Grab file', '/attachments/files_dir/' . $data['Pet']['p
 
 If you are upgrading from v0.5 take note of the following:
 * Configuration option @photos_dir@ is now @files_dir@.
-* Configuration option @database@ is now @save_in_db@.
 * You may need to tweak your database schema (not necessarily though).
 
 If you used default options the upgrade may be seamless.
-
-h3. Database storage (not working right now)
-
-# Change @$config['database'] = true@ in attachment.php.
-# In your controller action:
-  @$binary_data = $this->Attachment->upload($this->data['Model']['Attachment']);@
-# Save @$binary_data@ to database binary column:
-  @$this->data['Model']['file_contents'] = $binary_data;@
 
 h2. Configuration options (default values between parentheses)
 
 * @files_dir@: Where to save the files (inside @/app/webroot/attachments/@) (@photos@).
 * @rm_tmp_file@: Remove temporal image after resizing (@false@).
-* @save_in_db@: Save the images in the database or the filesystem (@false@).
 * @allow_non_image_files@, self descriptive ;-) (@true@).
 * @default_col@: Column prefix for file related data (lowercase modelname).
 * @images_size@: Array of different file sizes required by your app. Each
@@ -97,8 +82,3 @@ h2. Requirements
 * PHP GD library installed and enabled.
 * @/app/webroot/attachments/@ must be writable by the web server.
 
-h2. To do list
-
-* For database uploading:
-** Do image resizing.
-** Option to show or download database files.
