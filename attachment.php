@@ -9,7 +9,6 @@ class AttachmentComponent extends Object
 	var $config = array(
 		'files_dir'   => 'photos',
 		'rm_tmp_file' => false,
-		'save_in_db'  => false,
 		'allow_non_image_files' => true,
 		'images_size' => array(
 			/* You may define as many options as you like */
@@ -33,7 +32,7 @@ class AttachmentComponent extends Object
 	}
 
 	/*
-	* Uploads file to either database or file system, according to $config.
+	* Uploads file to file system, according to $config.
 	* Example usage:
 	* 	$this->Attachment->upload($this->data['Model']['Attachment']);
 	*
@@ -41,26 +40,22 @@ class AttachmentComponent extends Object
 	*	data: the file input array
 	*/
 	function upload(&$data, $column_prefix = null) {
-		if ($column_prefix == null) $column_prefix = $this->config['default_col'];
-		$file = $data[$column_prefix];
+		if ($column_prefix == null) {
+			$column_prefix = $this->config['default_col'];
+		} else {
+			$this->config['default_col'] = $column_prefix;
+		}
+
+		$file = $data[$this->config['default_col']];
 		if ($file['error'] === UPLOAD_ERR_OK) {
-			return $this->upload_FS($data, $column_prefix);
-		} else
-			$this->log_error_and_exit($file['error']);
+			return $this->upload_FS($data);
+		} else {
+			return $this->log_proper_error($file['error']);
+		}
 	}
 
-	function upload_DB(&$data) {
-		/*
-		$fp = fopen($data['tmp_name'], 'r');
-		$content = fread($fp, filesize($data['tmp_name']));
-		fclose($fp);
-		return addslashes($content);
-		*/
-		return false;
-	}
-
-	function upload_FS(&$data, $column_prefix) {
-		if ($column_prefix == null) $column_prefix = $this->config['default_col'];
+	function upload_FS(&$data) {
+		$column_prefix = $this->config['default_col'];
 		$error = 0;
 		$tmpuploaddir  = WWW_ROOT.'attachments'.DS.'tmp'; // /tmp/ folder (should delete image after upload)
 		$fileuploaddir = WWW_ROOT.'attachments'.DS.'files';
@@ -74,28 +69,27 @@ class AttachmentComponent extends Object
 		$filename = String::uuid();
 		settype($filename, 'string');
 		$filename .= '.' . $filetype;
-		$tmpfile  = $tmpuploaddir.DS.$filename;
-		$filefile = $fileuploaddir.DS.$filename;
 
 		/* Security check */
 		if (!is_uploaded_file($data[$column_prefix]['tmp_name'])) {
-			exit('Error uploading file (sure it was a POST request?).');
+			return $this->log_cakephp_error_and_return('Error uploading file (sure it was a POST request?).');
 		}
 
 		/* If it's image get image size and make thumbnail copies. */
 		if ($this->is_image($filetype)) {
-			$this->copy_or_raise_error($data[$column_prefix]['tmp_name'], $tmpfile);
+			$this->copy_or_log_error($data[$column_prefix]['tmp_name'], $tmpuploaddir, $filename);
 			/* Create each thumbnail_size */
 			foreach ($this->config['images_size'] as $dir => $opts) {
-				$this->thumbnail($tmpfile,$dir,$opts[0],$opts[1],$opts[2]);
+				$this->thumbnail($tmpuploaddir.DS.$filename, $dir, $opts[0], $opts[1], $opts[2]);
 			}
 			if ($this->config['rm_tmp_file'])
 				unlink($tmpfile);
 		} else {
 			if (!$this->config['allow_non_image_files']) {
-				exit('File type not allowed.');
+				return $this->log_cakephp_error_and_return('File type not allowed (only images files).');
+			} else {
+				$this->copy_or_log_error($data[$column_prefix]['tmp_name'], $fileuploaddir, $filename);
 			}
-			$this->copy_or_raise_error($data[$column_prefix]['tmp_name'], $filefile);
 		}
 
 		/* File uploaded, return modified data array */
@@ -167,19 +161,19 @@ class AttachmentComponent extends Object
 	*	newHeight: the max height or crop height
 	*	quality: the quality of the image
 	*/
-	function resize_image($cType = 'resize', $tmpfile, $dstfolder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75) {
+	function resize_image($cType = 'resize', $tmpfile, $dst_folder, $dstname = false, $newWidth=false, $newHeight=false, $quality = 75) {
 		$srcimg = $tmpfile;
 		list($oldWidth, $oldHeight, $type) = getimagesize($srcimg);
 		$ext = $this->image_type_to_extension($type);
 
 		// If file is writeable, create destination (tmp) image
-		if (is_writeable($dstfolder)) {
-			$dstimg = $dstfolder.DS.$dstname;
+		if (is_writeable($dst_folder)) {
+			$dstimg = $dst_folder.DS.$dstname;
 		} else {
-			// if dirFolder not writeable, let developer know
+			// if dst_folder not writeable, let developer know
 			debug('You must allow proper permissions for image processing. And the folder has to be writable.');
-			debug("Run 'chmod 755 $dstfolder', and make sure the web server is it's owner.");
-			exit();
+			debug("Run 'chmod 755 $dst_folder', and make sure the web server is it's owner.");
+			return $this->log_cakephp_error_and_return('No write permissions on attachments folder.');
 		}
 
 		/* Check if something is requested, otherwise do not resize */
@@ -314,12 +308,20 @@ class AttachmentComponent extends Object
 		}
 	}
 
+
 	/* Many helper functions */
 
-	function copy_or_raise_error($tmp_name, $filefile) {
-		if (!copy($tmp_name, $filefile)) {
-			unset($filename);
-			exit('Error uploading file.'); /* Returns false */
+	function copy_or_log_error($tmp_name, $dst_folder, $dst_filename) {
+		if (is_writeable($dst_folder)) {
+			if (!copy($tmp_name, $dst_folder.DS.$dst_filename)) {
+				unset($dst_filename);
+				return $this->log_cakephp_error_and_return('Error uploading file.', 'publicaciones');
+			}
+		} else {
+			// if dst_folder not writeable, let developer know
+			debug('You must allow proper permissions for image processing. And the folder has to be writable.');
+			debug("Run 'chmod 755 $dst_folder', and make sure the web server is it's owner.");
+			return $this->log_cakephp_error_and_return('No write permissions on attachments folder.');
 		}
 	}
 
@@ -328,7 +330,7 @@ class AttachmentComponent extends Object
 		return in_array(strtolower($file_type), $image_types);
 	}
 
-	function log_error_and_exit($err_code) {
+	function log_proper_error($err_code) {
 		switch ($err_code) {
 			case UPLOAD_ERR_NO_FILE:
 				return 0;
@@ -353,31 +355,36 @@ class AttachmentComponent extends Object
 			default:
 				$e = 'Unknown upload error. Did you add array(\'type\' => \'file\') to your form?';
 		}
-		$this->log($e, 'attachment-component');
-		exit($e);
+		return $this->log_cakephp_error_and_return($e);
+	}
+
+	function log_cakephp_error_and_return($msg) {
+		$_error["{$this->config['default_col']}_file_name"] = $msg;
+		$this->controller->{$this->controller->modelClass}->validationErrors = array_merge($_error, $this->controller->{$this->controller->modelClass}->validationErrors);
+		$this->log($msg, 'attachment-component');
+		return false;
 	}
 
 	function image_type_to_extension($imagetype) {
 		if (empty($imagetype)) return false;
 		switch($imagetype) {
-			case IMAGETYPE_GIF    : return 'gif';
-			case IMAGETYPE_JPEG   : return 'jpg';
-			case IMAGETYPE_PNG    : return 'png';
-			case IMAGETYPE_SWF    : return 'swf';
-			case IMAGETYPE_PSD    : return 'psd';
-			case IMAGETYPE_BMP    : return 'bmp';
 			case IMAGETYPE_TIFF_II : return 'tiff';
 			case IMAGETYPE_TIFF_MM : return 'tiff';
-			case IMAGETYPE_JPC    : return 'jpc';
-			case IMAGETYPE_JP2    : return 'jp2';
-			case IMAGETYPE_JPX    : return 'jpf';
-			case IMAGETYPE_JB2    : return 'jb2';
-			case IMAGETYPE_SWC    : return 'swc';
-			case IMAGETYPE_IFF    : return 'aiff';
-			case IMAGETYPE_WBMP   : return 'wbmp';
-			case IMAGETYPE_XBM    : return 'xbm';
-			default               : return false;
+			case IMAGETYPE_GIF  : return 'gif';
+			case IMAGETYPE_JPEG : return 'jpg';
+			case IMAGETYPE_PNG  : return 'png';
+			case IMAGETYPE_SWF  : return 'swf';
+			case IMAGETYPE_PSD  : return 'psd';
+			case IMAGETYPE_BMP  : return 'bmp';
+			case IMAGETYPE_JPC  : return 'jpc';
+			case IMAGETYPE_JP2  : return 'jp2';
+			case IMAGETYPE_JPX  : return 'jpf';
+			case IMAGETYPE_JB2  : return 'jb2';
+			case IMAGETYPE_SWC  : return 'swc';
+			case IMAGETYPE_IFF  : return 'aiff';
+			case IMAGETYPE_WBMP : return 'wbmp';
+			case IMAGETYPE_XBM  : return 'xbm';
+			default             : return false;
 		}
 	}
 }
-?>

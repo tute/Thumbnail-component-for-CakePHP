@@ -8,7 +8,7 @@ I've started it from the public copy at
 to have a standard way of uploading files to CakePHP projects.
 
 
-h2. Usage
+h2. Usage & code examples
 
 # Copy @attachment.php@ to @/app/controllers/components/@
 # Add component to your controller: @var $components = array('Attachment');@
@@ -29,16 +29,26 @@ specify it on the upload method, like so:
 
 @$this->Attachment->upload($this->data['Pet'], 'dog');@
 
-You can access the files from the view with the following lines:
+h3. Access files from the view
 
-Image: @<?= $html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@
-File:  @<?= $html->link('Grab file', '/attachments/files_dir/' . $data['Pet']['pet_file_path']); ?>@
+For images: @<?= $html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@
+For files:  @<?= $html->link('Grab file', '/attachments/files_dir/' . $data['Pet']['pet_file_path']); ?>@
 
-If you are upgrading from v0.5 take note of the following:
-* Configuration option @photos_dir@ is now @files_dir@.
-* You may need to tweak your database schema (not necessarily though).
+h3. Code for showing validation errors in the view
 
-If you used default options the upgrade may be seamless.
+@if(isset($form->validationErrors)) {
+	foreach ($form->validationErrors as $model => $columns) {
+		foreach ($columns as $err_msg) {
+			echo $html->div('error-message', $err_msg);
+		}
+	}
+}@
+
+Only for the file input:
+
+@if (isset($form->validationErrors['Pet']['pet_file_name'])) {
+	echo $html->div('error-message', $form->validationErrors['Pet']['pet_file_name']);
+}@
 
 h2. Configuration options (default values between parentheses)
 
