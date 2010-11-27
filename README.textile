@@ -36,19 +36,19 @@ For files:  @<?= $html->link('Grab file', '/attachments/files_dir/' . $data['Pet
 
 h3. Code for showing validation errors in the view
 
-@if(isset($form->validationErrors)) {
-	foreach ($form->validationErrors as $model => $columns) {
-		foreach ($columns as $err_msg) {
-			echo $html->div('error-message', $err_msg);
-		}
-	}
-}@
+@if(isset($form->validationErrors)) {@
+	@foreach ($form->validationErrors as $model => $columns) {@
+		@foreach ($columns as $err_msg) {@
+			@echo $html->div('error-message', $err_msg);@
+		@}@
+	@}@
+@}@
 
 Only for the file input:
 
-@if (isset($form->validationErrors['Pet']['pet_file_name'])) {
-	echo $html->div('error-message', $form->validationErrors['Pet']['pet_file_name']);
-}@
+@if (isset($form->validationErrors['Pet']['pet_file_name'])) {@
+	@echo $html->div('error-message', $form->validationErrors['Pet']['pet_file_name']);@
+@}@
 
 h2. Configuration options (default values between parentheses)
 
