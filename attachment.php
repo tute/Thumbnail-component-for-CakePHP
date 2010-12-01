@@ -83,7 +83,7 @@ class AttachmentComponent extends Object
 				$this->thumbnail($tmpuploaddir.DS.$filename, $dir, $opts[0], $opts[1], $opts[2]);
 			}
 			if ($this->config['rm_tmp_file'])
-				unlink($tmpfile);
+				unlink($tmpuploaddir.DS.$filename);
 		} else {
 			if (!$this->config['allow_non_image_files']) {
 				return $this->log_cakephp_error_and_return('File type not allowed (only images files).');
