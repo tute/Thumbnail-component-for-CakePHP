@@ -14,8 +14,8 @@ h2. Usage & code examples
 # Add component to your controller: @var $components = array('Attachment');@
 # Add DB columns (as noted below).
 # In your upload form:
-## @echo $form->create('Model', array('type' => 'file'));@
-## @echo $form->file('pet'); // pet is the lower case model-name@
+## @echo $this->Form->create('Model', array('type' => 'file'));@
+## @echo $this->Form->file('pet'); // pet is the lower case model-name@
 
 We'll asume a Model named 'Pet' for a sample installation. The code relies on
 four columns in the Model table: @pet_file_path, pet_file_name, pet_file_size@ and
@@ -31,23 +31,23 @@ specify it on the upload method, like so:
 
 h3. Access files from the view
 
-For images: @<?= $html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@
-For files:  @<?= $html->link('Grab file', '/attachments/files_dir/' . $data['Pet']['pet_file_path']); ?>@
+For images: @<?= $this->Html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@
+For files:  @<?= $this->Html->link('Grab file', '/attachments/files_dir/' . $data['Pet']['pet_file_path']); ?>@
 
 h3. Code for showing validation errors in the view
 
-@if(isset($form->validationErrors)) {@
-	@foreach ($form->validationErrors as $model => $columns) {@
-		@foreach ($columns as $err_msg) {@
-			@echo $html->div('error-message', $err_msg);@
-		@}@
-	@}@
+@if(isset($this->Form->validationErrors)) {@
+  @foreach ($this->Form->validationErrors as $model => $columns) {@
+    @foreach ($columns as $err_msg) {@
+      @echo $this->Html->div('error-message', $err_msg);@
+    @}@
+  @}@
 @}@
 
 Only for the file input:
 
-@if (isset($form->validationErrors['Pet']['pet_file_name'])) {@
-	@echo $html->div('error-message', $form->validationErrors['Pet']['pet_file_name']);@
+@if (isset($this->Form->validationErrors['Pet']['pet_file_name'])) {@
+	@echo $this->Html->div('error-message', $this->Form->validationErrors['Pet']['pet_file_name']);@
 @}@
 
 h2. Configuration options (default values between parentheses)
