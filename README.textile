@@ -18,7 +18,7 @@ h2. Usage & code examples
 ## @echo $form->file('pet'); // pet is the lower case model-name@
 
 We'll asume a Model named 'Pet' for a sample installation. The code relies on
-four columns: @pet_file_path, pet_file_name, pet_file_size@ and
+four columns in the Model table: @pet_file_path, pet_file_name, pet_file_size@ and
 @pet_content_type@, which are automagically updated when you call from the
 controller *(before @save()@ action)*:
 
