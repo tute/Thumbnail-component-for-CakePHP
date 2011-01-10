@@ -28,9 +28,9 @@ Models with multi-word names should have each word seperated by underscores. For
 
 @gallery_photo_file_path, gallery_photo_file_name, gallery_photo_file_size@ and @gallery_photo_content_type@
 
-These fields are automagically updated when you call @save()@ on $this->data
+These fields are automagically updated when you call @save()@ on the @$this->data@ array
 
-h3. Controller setup
+h3. View setup
 
 @<?= $this->Form->create('Pet', array('type' => 'file'));@
 @<?= $this->Form->input('pet' , array('type' => 'file')); ?>@
