@@ -16,7 +16,7 @@ h3. Installation
 
 # Copy @attachment.php@ to @/app/controllers/components/@
 # Add component to your controller: @var $components = array('Attachment');@
-# Add DB columns {prefix}_file_path, {prefix}_file_name, {prefix}_file_size and {prefix}_content_type to the model
+# Add DB columns {prefix}_file_path, {prefix}_file_name, {prefix}_file_size and {prefix}_content_type to the model. The prefix is the model name, in lowercase, words seperated by underscores.
 
 h3. Model setup
 
@@ -47,9 +47,9 @@ Configuration options (default values between parentheses);
 * @allow_non_image_files@, self descriptive ;-) (@true@).
 * @default_col@: Column prefix for file related data (lowercase modelname, words seperated by underscores).
 * @images_size@: Array of different file sizes required by your app. Each
-  element is itself an array, like:
-    @'folder_name' => array($width, $height, $crop)@.
-  You may define only width or height, and the image will scale appropriately.
+  element is itself an array, like: @'folder_name' => array($width, $height, $crop)@.
+  
+(You may define only width or height, and the image will scale appropriately).
 
 You can override the default configuration passing an array of options while
 including the component, like;
