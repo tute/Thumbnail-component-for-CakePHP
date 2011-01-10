@@ -30,7 +30,7 @@ Models with multi-word names should have each word seperated by underscores. For
 
 These fields are automagically updated when you call @save()@ on @$this->data@
 
-.h3 View setup
+h3. Controller setup
 
 @<?= $this->Form->create('Pet', array('type' => 'file'));@
 @<?= $this->Form->input('pet' , array('type' => 'file')); ?>@
