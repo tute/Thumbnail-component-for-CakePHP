@@ -7,12 +7,12 @@ I've started it from the public copy at
 "@http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/@":http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/
 to have a standard way of uploading files to CakePHP projects.
 
-h3. Requirements
+h2. Requirements
 
 # PHP GD library installed and enabled.
 # @/app/webroot/attachments/@ must be writable by the web server.
 
-h3. Installation
+h2. Installation
 
 # Copy @attachment.php@ to @/app/controllers/components/@
 # Add component to your controller: @var $components = array('Attachment');@
@@ -20,33 +20,40 @@ h3. Installation
 and {prefix}_content_type to the model. The prefix is the model name, in
 lowercase, words seperated by underscores.
 
-h3. Model setup
+h2. Model setup
 
 We'll asume a Model named 'Pet' for a sample installation. The code relies on
-four columns in the Model table;
+four columns in the Model table:
 
 @pet_file_path, pet_file_name, pet_file_size@ and @pet_content_type@
 
 Models with multi-word names should have each word seperated by underscores.
 For example, the model "GalleryPhoto" would use the table "gallery_photos" and
-the following fields;
+the following fields:
 
 @gallery_photo_file_path, gallery_photo_file_name, gallery_photo_file_size@ and @gallery_photo_content_type@
 
 These fields are automagically updated when you call @save()@ on the @$this->data@ array
 
-h3. View setup
+h2. View setup
+
+h3. On forms
 
 @<?= $this->Form->create('Pet', array('type' => 'file'));@
 @<?= $this->Form->input('pet' , array('type' => 'file')); ?>@
 @<?= $this->Form->end('Save my pooch'); ?>@
 
-The input 'pet' (which needs to be type 'file' of course) is the lower case
-model-name, multi-word model names seperated by underscores.
+The (file) input 'pet' is the lower case model-name, multi-word model names
+seperated by underscores.
 
-h3. Controller setup
+h3. Show files (after they are saved)
 
-Configuration options (default values between parentheses);
+For images: @<?= $this->Html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@
+For files:  @<?= $this->Html->link('Grab file', '/attachments/files_dir/' . $data['Pet']['pet_file_path']); ?>@
+
+h2. Controller setup
+
+Configuration options (default values between parentheses):
 
 * @files_dir@: Where to save the files (inside @/app/webroot/attachments/@) (@photos@).
 * @rm_tmp_file@: Remove temporal image after resizing (@false@).
@@ -54,24 +61,25 @@ Configuration options (default values between parentheses);
 * @default_col@: Column prefix for file related data (lowercase modelname, words seperated by underscores).
 * @images_size@: Array of different file sizes required by your app. Each
   element is itself an array, like: @'folder_name' => array($width, $height, $crop)@.
-  
-(You may define only width or height, and the image will scale appropriately).
+  (You may define only width or height, and the image will scale appropriately).
 
 You can override the default configuration passing an array of options while
-including the component, like;
+including the component, like:
 
 @var $components = array('Attachment' => array(
 	'files_dir' => 'pets',
 	'images_size' => array(
-		'avatar'  => array(75, 75, true)
+		'avatar'  => array(75, 75, 'resizeCrop')
 	)
 ));@
 
+h3. Controller methods:
+
 h4. upload($data)
 
-* @$data@: raw data from form
+* @data@: Raw data from form.
 
-Simply call the following on the form data;
+Simply call the following on the form data:
 
 @$this->Attachment->upload($this->data['Pet']);@
 
@@ -82,6 +90,8 @@ specify it on the upload method, like so:
 
 h4. thumbnail($data, $upload_dir, $maxw, $maxh, $crop = 'resize')
 
+Used by the more general @upload@ method.
+
 * @data@: image data array
 * @upload_dir@: where to save the file (inside @attachments/files_dir@)
 * @maxw/maxh@: maximum width/height for resizing images
@@ -91,14 +101,9 @@ h4. delete_files($filename)
 
 * @filename@: file-to-delete name
 
-h3. Access files after they are saved
+h2. Validations
 
-For images: @<?= $this->Html->image('/attachments/files_dir/{size}/' . $data['Pet']['pet_file_path']); ?>@
-For files:  @<?= $this->Html->link('Grab file', '/attachments/files_dir/' . $data['Pet']['pet_file_path']); ?>@
-
-h3. Validation
-
-You may wish to validate from the model. e.g;
+You may wish to validate from the model. e.g:
 
 @var $validate = array(@
 		@'pet_file_size' => array(@
@@ -107,7 +112,7 @@ You may wish to validate from the model. e.g;
 			@)@
 	 @);@
 
-h3. Code for showing validation errors in the view
+h3. Show validation errors in the view
 
 @if(isset($this->Form->validationErrors)) {@
   @foreach ($this->Form->validationErrors as $model => $columns) {@
@@ -117,7 +122,7 @@ h3. Code for showing validation errors in the view
   @}@
 @}@
 
-Only for the file input:
+h4. Only for the file input:
 
 @if (isset($this->Form->validationErrors['Pet']['pet_file_name'])) {@
 	@echo $this->Html->div('error-message', $this->Form->validationErrors['Pet']['pet_file_name']);@
