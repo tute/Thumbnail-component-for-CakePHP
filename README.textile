@@ -41,7 +41,7 @@ h3. View setup
 @<?= $this->Form->input('pet' , array('type' => 'file')); ?>@
 @<?= $this->Form->end('Save my pooch'); ?>@
 
-The input 'pet' (which is needs to be type 'file' of course) is the lower case
+The input 'pet' (which needs to be type 'file' of course) is the lower case
 model-name, multi-word model names seperated by underscores.
 
 h3. Controller setup
