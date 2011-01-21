@@ -16,15 +16,20 @@ h3. Installation
 
 # Copy @attachment.php@ to @/app/controllers/components/@
 # Add component to your controller: @var $components = array('Attachment');@
-# Add DB columns {prefix}_file_path, {prefix}_file_name, {prefix}_file_size and {prefix}_content_type to the model. The prefix is the model name, in lowercase, words seperated by underscores.
+# Add DB columns {prefix}_file_path, {prefix}_file_name, {prefix}_file_size
+and {prefix}_content_type to the model. The prefix is the model name, in
+lowercase, words seperated by underscores.
 
 h3. Model setup
 
-We'll asume a Model named 'Pet' for a sample installation. The code relies on four columns in the Model table; 
+We'll asume a Model named 'Pet' for a sample installation. The code relies on
+four columns in the Model table;
 
 @pet_file_path, pet_file_name, pet_file_size@ and @pet_content_type@
 
-Models with multi-word names should have each word seperated by underscores. For example, the model "GalleryPhoto" would use the table "gallery_photos" and the following fields;
+Models with multi-word names should have each word seperated by underscores.
+For example, the model "GalleryPhoto" would use the table "gallery_photos" and
+the following fields;
 
 @gallery_photo_file_path, gallery_photo_file_name, gallery_photo_file_size@ and @gallery_photo_content_type@
 
@@ -36,7 +41,8 @@ h3. View setup
 @<?= $this->Form->input('pet' , array('type' => 'file')); ?>@
 @<?= $this->Form->end('Save my pooch'); ?>@
 
-The input 'pet' (which is needs to be type 'file' of course) is the lower case model-name, multi-word model names seperated by underscores.
+The input 'pet' (which is needs to be type 'file' of course) is the lower case
+model-name, multi-word model names seperated by underscores.
 
 h3. Controller setup
 
@@ -69,7 +75,8 @@ Simply call the following on the form data;
 
 @$this->Attachment->upload($this->data['Pet']);@
 
-You may choose different column prefixes than the model name, as long as you specify it on the upload method, like so:
+You may choose different column prefixes than the model name, as long as you
+specify it on the upload method, like so:
 
 @$this->Attachment->upload($this->data['Pet'], 'dog');@
 
@@ -115,7 +122,3 @@ Only for the file input:
 @if (isset($this->Form->validationErrors['Pet']['pet_file_name'])) {@
 	@echo $this->Html->div('error-message', $this->Form->validationErrors['Pet']['pet_file_name']);@
 @}@
-
-
-
-
