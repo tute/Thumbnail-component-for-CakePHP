@@ -102,10 +102,17 @@ class AttachmentComponent extends Object {
 		/* If it's image get image size and make thumbnail copies. */
 		if ($this->is_image($filetype)) {
 			$this->copy_or_log_error($data[$column_prefix]['tmp_name'], $tmpuploaddir, $filename);
-			/* Create each thumbnail_size */
-			foreach ($this->config['images_size'] as $dir => $opts) {
-				$this->thumbnail($tmpuploaddir.DS.$filename, $dir, $opts[0], $opts[1], $opts[2]);
-			}
+
+                        if(empty($this->config['images_size'])) {
+                            /* No thumbnails needed */
+                            $upload_dir = WWW_ROOT.'attachments'.DS.$this->config['files_dir'];
+                            $this->copy_or_log_error($tmpuploaddir.DS.$filename, $upload_dir, $filename);
+                        } else {
+                            /* Create each thumbnail_size */
+                            foreach ($this->config['images_size'] as $dir => $opts) {
+                                    $this->thumbnail($tmpuploaddir.DS.$filename, $dir, $opts[0], $opts[1], $opts[2]);
+                            }
+                        }
 			if ($this->config['rm_tmp_file'])
 				unlink($tmpuploaddir.DS.$filename);
 		} else {
@@ -165,11 +172,17 @@ class AttachmentComponent extends Object {
 		if (is_file(WWW_ROOT.'attachments'.DS.'tmp'.DS.$filename)) {
 			unlink(WWW_ROOT.'attachments'.DS.'tmp'.DS.$filename);
 		}
-		/* Thumbnail copies */
-		foreach ($this->config['images_size'] as $size => $opts) {
-			$photo = WWW_ROOT.'attachments'.DS.$this->config['files_dir'].DS.$size.DS.$filename;
+                /* Images */
+                if (empty($this->config['images_size'])) {
+			$photo = WWW_ROOT.'attachments'.DS.$this->config['files_dir'].DS.$filename;
 			if (is_file($photo)) unlink($photo);
-		}
+                } else {
+                    /* Thumbnail copies */
+                    foreach ($this->config['images_size'] as $size => $opts) {
+                            $photo = WWW_ROOT.'attachments'.DS.$this->config['files_dir'].DS.$size.DS.$filename;
+                            if (is_file($photo)) unlink($photo);
+                    }
+                }
 	}
 
 	/*

@@ -62,6 +62,7 @@ Configuration options (default values between parentheses):
 * @images_size@: Array of different file sizes required by your app. Each
   element is itself an array, like: @'folder_name' => array($width, $height, $crop)@.
   (You may define only width or height, and the image will scale appropriately).
+  Pass an empty array to simply copy the file without resizing.
 
 You can override the default configuration passing an array of options while
 including the component, like:
