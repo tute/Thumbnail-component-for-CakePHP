@@ -1,0 +1,8 @@
+Version 0.9.5 (2011-10-27)
+* added __constructor method to adhere to CakePHP 2.0 Migration policy
+* removed $config parameter from initialize method to adhere to CakePHP 2.0 Migration policy
+* added $config options 'max_file_size' and 'allowed_image_file_types'
+* modified is_image method taking new config option into consideration
+* added file size check in upload_FS method
+* added format_bytes function to format file size
+
