@@ -7,6 +7,8 @@ I've started it from the public copy at
 "@http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/@":http://sabbour.wordpress.com/2008/07/18/enhanced-image-upload-component-for-cakephp-12/
 to have a standard way of uploading files to CakePHP projects.
 
+See branch cake1.3 for Cake 1.3 version; branch cake2 for CakePHP 2 version.
+
 h2. Requirements
 
 # PHP GD library installed and enabled.
