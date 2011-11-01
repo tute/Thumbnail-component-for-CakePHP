@@ -1,0 +1,27 @@
+2011-11-01 10:28:24 Error: [MissingDatasourceConfigException] The datasource configuration "bake_default" was not found in database.php
+#0 D:\xampp\htdocs\sqlite_test\lib\Cake\Model\ConnectionManager.php(91): ConnectionManager::_getConnectionObject('bake_default')
+#1 D:\xampp\htdocs\sqlite_test\lib\Cake\Model\Model.php(3212): ConnectionManager::getDataSource('bake_default')
+#2 D:\xampp\htdocs\sqlite_test\lib\Cake\Model\Model.php(1023): Model->setDataSource('bake_default')
+#3 D:\xampp\htdocs\sqlite_test\lib\Cake\Model\Model.php(3236): Model->setSource('pets')
+#4 D:\xampp\htdocs\sqlite_test\lib\Cake\Model\Model.php(2458): Model->getDataSource()
+#5 D:\xampp\htdocs\sqlite_test\lib\Cake\Controller\Component\PaginatorComponent.php(172): Model->find('all', Array)
+#6 D:\xampp\htdocs\sqlite_test\lib\Cake\Controller\Controller.php(1024): PaginatorComponent->paginate(NULL, Array, Array)
+#7 D:\xampp\htdocs\sqlite_test\app\Controller\PetsController.php(23): Controller->paginate()
+#8 [internal function]: PetsController->index()
+#9 D:\xampp\htdocs\sqlite_test\lib\Cake\Controller\Controller.php(473): ReflectionMethod->invokeArgs(Object(PetsController), Array)
+#10 D:\xampp\htdocs\sqlite_test\lib\Cake\Routing\Dispatcher.php(107): Controller->invokeAction(Object(CakeRequest))
+#11 D:\xampp\htdocs\sqlite_test\lib\Cake\Routing\Dispatcher.php(89): Dispatcher->_invoke(Object(PetsController), Object(CakeRequest), Object(CakeResponse))
+#12 D:\xampp\htdocs\sqlite_test\app\webroot\index.php(96): Dispatcher->dispatch(Object(CakeRequest), Object(CakeResponse))
+#13 {main}
+2011-11-01 10:37:01 Error: [MissingControllerException] Controller class AttachmentsController could not be found.
+#0 D:\xampp\htdocs\sqlite_test\app\webroot\index.php(96): Dispatcher->dispatch(Object(CakeRequest), Object(CakeResponse))
+#1 {main}
+2011-11-01 10:38:00 Error: [MissingControllerException] Controller class Splfileinfo.openfileController could not be found.
+#0 D:\xampp\htdocs\sqlite_test\app\webroot\index.php(96): Dispatcher->dispatch(Object(CakeRequest), Object(CakeResponse))
+#1 {main}
+2011-11-01 10:38:04 Error: [MissingControllerException] Controller class AttachmentsController could not be found.
+#0 D:\xampp\htdocs\sqlite_test\app\webroot\index.php(96): Dispatcher->dispatch(Object(CakeRequest), Object(CakeResponse))
+#1 {main}
+2011-11-01 10:42:10 Error: [MissingControllerException] Controller class AttachmentsController could not be found.
+#0 D:\xampp\htdocs\sqlite_test\app\webroot\index.php(96): Dispatcher->dispatch(Object(CakeRequest), Object(CakeResponse))
+#1 {main}
